@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-905ee23b.js";
+            window.path_to_searchindex_js = "../../searchindex-0d795b63.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-b9d2f279.js"></script>
@@ -298,11 +298,11 @@ if(num % 2 == 0){
 
 if(result){
     document.write("탈퇴 처리되었습니다");
-}   else{
+} else{
     document.write("탈퇴 취소되었습니다");
 }
 </code></pre>
-  </details><br>    
+  </details>    
 </li>
 </ul>
 </li>
@@ -338,7 +338,7 @@ if(score &gt;= 90){
   <details><summary> 정답 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-JavaScript">let mon = prompt("현재는 몇 월입니까?", "");
 
-if (mon &gt;= 3 &amp;&amp; mon &lt;= 5){
+if (mon &gt;= 3 &amp;&amp; mon &lt;= 5){   
     document.write("봄!! 벗꽃보러 가요!!");
 } else if (mon &gt;= 6 &amp;&amp; mon &lt;= 8){
     document.write("여름!! 떠나요~ 둘이서!!");
@@ -371,7 +371,7 @@ if (time &gt;= 7 &amp;&amp; time &lt;= 8){
     document.write("오늘도 고생하셨어요");
 }
 </code></pre>
-  </details><br><br>     
+  </details>    
 </li>
 </ul>
 </li>
@@ -414,11 +414,21 @@ while(i &lt;= 10){
 for(let i = 1; i &lt;= count; i++){
     alert(i + "번째 메세지입니다!");
 }
-
-&lt;/details&gt;&lt;br&gt; 
-
 </code></pre>
-</details></li>
+ </details><br> 
+</li>
+<li>
+<p>방문자로부터 구구단의 단수를 입력 받아 화면에 구구단을 출력하도록 작성해 붑시다.</p>
+  <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
+<pre><code class="language-Javascript">let num = prompt("출력할 구구단 단수를 입력하세요", "1");
+let i = 1;
+
+document.write("for문을 이용한 출력", "&lt;br&gt;");
+for(i = 1; i &lt; 10; i++){
+    document.write(num + "*" + i + "=" + (num * i) + "&lt;br&gt;");
+}
+</code></pre>
+  </details></li>
 </ul>
 </li>
 </ul>

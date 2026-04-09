@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-905ee23b.js";
+            window.path_to_searchindex_js = "../../searchindex-0d795b63.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-b9d2f279.js"></script>
@@ -179,10 +179,10 @@
 <h2 id="1-상수와-변수"><a class="header" href="#1-상수와-변수">1. 상수와 변수</a></h2>
 <ul>
 <li>
-<h3 id="상수constant의-개념-및-선언"><a class="header" href="#상수constant의-개념-및-선언">상수(Constant)의 개념 및 선언</a></h3>
+<h3 id="상수constant의-개념-및-선언"><a class="header" href="#상수constant의-개념-및-선언">상수(constant)의 개념 및 선언</a></h3>
 <ul>
 <li>
-<p>상수는 <em>항상 같은 수</em>라는 의미로 값에 이름을 한 번 붙이면 값을 수정할 수 없음</p>
+<p>상수는 <em>항상 같은 수</em>라는 의미로 값에 이름을 한 번 붙이면 <em>값을 수정할 수 없음</em></p>
 </li>
 <li>
 <p>상수를 만드는 과정은 <em>선언</em>이라고 표현하고, <em>const 키워드</em>를 사용하여 선언</p>
@@ -215,11 +215,11 @@ pi = 3.14
 </ul>
 </li>
 <li>
-<h3 id="변수variable의-개념-및-선언"><a class="header" href="#변수variable의-개념-및-선언">변수(Variable)의 개념 및 선언</a></h3>
+<h3 id="변수variable의-개념-및-선언"><a class="header" href="#변수variable의-개념-및-선언">변수(variable)의 개념 및 선언</a></h3>
 <ul>
 <li>
-<p>변수는 <em>변하는 데이터(값)을 저장</em>할 수 있는 메모리 공간으로 <em>오직 한 개</em>만 저장<br><br>
-<img src="../images/js07.jpg" width="80%" height="80%"></p>
+<p>변수는 <em>변하는 데이터(값)를 저장</em>할 수 있는 메모리 공간으로 <em>오직 한 개</em>만 저장<br>
+<img src="../images/js07.jpg" width="70%" height="70%"></p>
 </li>
 <li>
 <p>변수를 만들 때는 <em>let 키워드</em>를 사용하고, 기본적인 사용 방법은 상수와 같음</p>
@@ -227,7 +227,8 @@ pi = 3.14
 <li>기본형: <code>let 변수명 또는 let 변수명 = 값</code><br><br></li>
 </ul>
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let box; 
+<pre><code class="language-JavaScript">//Chrome 창에서 개발자도구(F12) &gt; Console 탭 활용 실습
+let box; 
 
 box = 100;
 box = 30;
@@ -242,14 +243,14 @@ document.write(box);
 <h3 id="변수명-설정-방법"><a class="header" href="#변수명-설정-방법">변수명 설정 방법</a></h3>
 <ul>
 <li>
-<p>한글을 사용할 수 없으며, <em>영문과 숫자 그리고 일부 특수문자(_, $)만 사용</em> 가능</p>
+<p>한글을 사용할 수 없으며, <i>영문과 숫자 그리고 일부 특수문자(_, $)만 사용</i> 가능</p>
 <ul>
 <li>잘못된 예: <code>let 1num = 10;</code></li>
 <li>올바른 예: <code>let $snum = 10;</code></li>
 </ul>
 </li>
 <li>
-<p>첫 글자로 숫자를 사용할 수 없고, 예약어(document, location, window 등)를 식별자로 사용할 수 없음</p>
+<p><i>첫 글자로 숫자</i>를 사용할 수 없고, <i>예약어(document, location, window 등)</i>를 식별자로 <i>사용할 수 없음</i></p>
 <ul>
 <li>잘못된 예: <code>let document = 10;</code></li>
 <li>올바른 예: <code>let num = 10;</code></li>
@@ -273,7 +274,7 @@ document.write(box);
 </ul>
 </li>
 <li>
-<p>스네이크 표기법(Snake_case)</p>
+<p>스네이크 표기법(snake_case)</p>
 <ul>
 <li>모든 단어를 소문자로 표기하며, <i>단어 사이사이에 언더바(_)</i>를 넣어 표기</li>
 <li>사용 예: new_name, create_life_game</li>
@@ -365,7 +366,8 @@ document.write(box);
 <li>문자형 데이터 + 숫자형 데이터 = 하나의 문자형 데이터<br><br></li>
 </ul>
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let t1 = "학교종이";
+<pre><code class="language-JavaScript">//Chrome 창에서 개발자도구(F12) &gt; Console 탭 활용 실습
+let t1 = "학교종이";
 let t2 = "땡땡땡";
 let t3 = 8282;
 let t4 = "어서 모이자";
@@ -373,7 +375,6 @@ let result
 
 result = t1 + t2 + t3 + t4;
 
-document.write(result); //console 탭에서 실습 시 불필요
 typeof(result)
 </code></pre>
   </details> 
@@ -408,6 +409,7 @@ typeof(result)
   <br>
   <details style="margin-left: 30px;"><summary> 예제 코드 보기/숨기기(클릭)</summary>
 <pre><code>  ```JavaScript
+  //Visual Studio Code에서 실습
   let num1 = 10;
   let num2 = 3;
 
@@ -442,26 +444,28 @@ typeof(result)
 <p>증감 연산자는 변수의 <em>어느 위치에 오는가</em>에 따라 결과값이 달라짐</p>
 <ul>
 <li>기본형: <code>++변수, 변수++, --변수, 변수--</code><br><br>
-<img src="../images/js08.png" width="70%" height="70%"><br><br></li>
+<img src="../images/js08.png" width="60%" height="60%"><br><br></li>
 </ul>
 </li>
 </ul>
   <details style="margin-left: 30px;"><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let num1 = 10;
+<pre><code class="language-JavaScript">//Visual Studio Code에서 실습
+let num1 = 10;
 let num2 = 20;
 let result;
 
-num1--;                 //num1(10)을 대입하고 1을 감소한 9
-document.write(num1, "&lt;br&gt;");
+result = ++num1;             //num1이 원래 10인데 ++가 앞에 있으므로 1을 증가시키고 result에 대입
+document.write(result, "&lt;br&gt;");
 
-num1++;                 //num1(9)를 대입하고 1을 증가한 10
-document.write(num1, "&lt;br&gt;");
+result = num1++;             //위의 결과에서 num1이 11로 바뀌고 ++가 뒤에 있으므로 바로 result에 대입
+document.write(result, "&lt;br&gt;");
 
-result = num2++;        //num2(20)에 1을 증가한 21 
-document.write(num1, "&lt;br&gt;");
+result = --num2;             //num1이 원래 20인데 --가 앞에 있으므로 1을 감소시키고 result에 대입
+document.write(result, "&lt;br&gt;");
 
-result = ++num2;        //num2(21)을 1 증가시켜서 num2(22)에 대입되고, num2(22)의 값이 변수 result에 저장
-document.write(num1, "&lt;br&gt;");
+//result 추가 복사해서 왜 그런지 살펴보기!!
+result = num2--;             //위의 결과에서 num2가 19로 바뀌고 --가 뒤에 있으므로 바로 result에 대입
+document.write(result, "&lt;br&gt;");
 </code></pre>
   </details>
 </li>
@@ -489,7 +493,8 @@ document.write(num1, "&lt;br&gt;");
 </div>
   <br>
   <details style="margin-left: 20px;"><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let a = 10;
+<pre><code class="language-JavaScript">//Visual Studio Code에서 실습
+let a = 10;
 let b = 20;
 let c = 30;
 let d = "10";
@@ -523,27 +528,32 @@ document.write(result, "&lt;br"&gt;);
 <tr><th style="text-align: center">종류</th><th style="text-align: center">설명</th></tr>
 </thead>
 <tbody>
-<tr><td style="text-align: center"></td><td style="text-align: center"></td></tr>
-<tr><td style="text-align: center">&amp;&amp;</td><td style="text-align: center">and 연산자로 피 연산자 중 값이 하나라도 false가 존재하면 false로 결과값을 반환</td></tr>
-<tr><td style="text-align: center">!</td><td style="text-align: center">not 연산자로 피 연산자의 값이 true면 반대로 false로 결과값을 반환</td></tr>
+<tr><td style="text-align: center"><code>||</code></td><td style="text-align: center">or 연산자로 피 연산자 중 값이 하나라도 true가 존재하면 true로 결과값을 반환</td></tr>
+<tr><td style="text-align: center"><code>&amp;&amp;</code></td><td style="text-align: center">and 연산자로 피 연산자 중 값이 하나라도 false가 존재하면 false로 결과값을 반환</td></tr>
+<tr><td style="text-align: center"><code>!</code></td><td style="text-align: center">not 연산자로 피 연산자의 값이 true면 반대로 false로 결과값을 반환</td></tr>
 </tbody>
 </table>
 </div>
   <br>
   <details style="margin-left: 30px;"><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let result;
+<pre><code class="language-JavaScript">//Visual Studio Code에서 실습
+let a = 10;
+let b = 20;
+let c = 30;
+let d = "10";
+let result;
 
-result = a &gt; b || b &lt;= c;      // false || true = true (or)
-document.write(num1, "&lt;br&gt;");
+result = a &gt; b || b &lt;= c;      // false || true = true (or 연산자)
+document.write(result, "&lt;br&gt;");
 
-result = b &gt;= a &amp;&amp; a &lt; c;      // true || true = true (and)
-document.write(num1, "&lt;br&gt;");
+result = b &gt;= a &amp;&amp; a &lt; c;      // true || true = true (and 연산자)
+document.write(result, "&lt;br&gt;");
 
 result = a == d                //true = true  
-document.write(num1, "&lt;br&gt;");
+document.write(result, "&lt;br&gt;");
 
-result = a !== d               //false = true (not)
-document.write(num1, "&lt;br&gt;");
+result = a !== d               //false = true (not 연산자)
+document.write(result, "&lt;br&gt;");
 </code></pre>
   </details>
 </li>
@@ -551,7 +561,7 @@ document.write(num1, "&lt;br&gt;");
 <h3 id="삼항-조건-연산자"><a class="header" href="#삼항-조건-연산자">삼항 조건 연산자</a></h3>
 <ul>
 <li>
-<p><em>연산한 결과 조건식의 만족 여부(true 또는 false)에 따라 코드를 다르게 실행</em>하고자 할 때 사용</p>
+<p><i>연산한 결과 조건식의 만족 여부(true 또는 false)에 따라 코드를 다르게 실행</i>하고자 할 때 사용</p>
 </li>
 <li>
 <p>연산을 위해 <em>피연산자가 3개</em> 필요</p>
@@ -561,7 +571,12 @@ document.write(num1, "&lt;br&gt;");
 </li>
 </ul>
   <details style="margin-left: 30px;"><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">result = a &gt; b ? "크다" : "작다";
+<pre><code class="language-JavaScript">//Visual Studio Code에서 실습
+let a = 10;
+let b = 20;
+let result;
+
+result = a &gt; b ? "크다" : "작다";
 document.write(result);
 </code></pre>
   </details>
@@ -589,21 +604,22 @@ document.write(result);
 <li>
 <p>적정 체중을 계산하면 다음과 같이 결과가 나오도록 코딩</p>
 <ul>
-<li>신장: 180(cm)<br>
-체중: 74(kg)<br>
-적정 체중: (180 – 100) * 0.9<br>
-결과: 적정 체중은 72kg이며, 현재 적정 체중에서 2kg 초과한 것을 알 수 있습니다.<br></li>
+<li>신장: 180(cm)<br></li>
+<li>체중: 74(kg)<br></li>
+<li>적정 체중: (180 – 100) * 0.9<br></li>
+<li>결과: 적정 체중이 숫자로 나타남<br></li>
 </ul>
 </li>
 <li>
 <p><em>신장과 체중</em>은 사용자의 신장과 체중에 따라 <em>값이 변하므로 변수</em>에 저장해야 함</p>
 </li>
 <li>
-<p>신장이 바뀌면 *적정 체중도 바뀌므로 <em>변수</em>에 저장해야 함</p>
+<p>신장이 바뀌면 <em>적정 체중도 바뀌므로 변수</em>에 저장해야 함</p>
   <details><summary> 정답 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-JavaScript">let userHeight = 180;
 let userWeight = 74;
 let normalWeight = (userHeight - 100) * 0.9;
+
 document.write(normalWeight);
 </code></pre>
   </details>
@@ -615,23 +631,34 @@ document.write(normalWeight);
 <p>질의응답 창은 <em>방문자에게 질문을 던져 응답을 받아올 수 있는 창으로 prompt() 메서드</em>를 사용</p>
 <ul>
 <li>기본형: prompt(“질문”, “기본 응답”);</li>
+<li>prompt 매서드는 기본적으로 문자를 반환하지만 자바스크립트가 <i>자동으로 숫자로 변환</i>해 줌</li>
+<li>가끔 자동으로 형 변환이 안되는 경우 발생하는데 이 때는 <i>Number()로 숫자로 변환</i></li>
 </ul>
 </li>
 <li>
 <p>질의응답 창을 이용해 <em>방문자의 이름, 신장, 체중을 입력</em> 받은 후 적정 평균 체중을 구함</p>
 </li>
 <li>
-<p><em>적정 평균 체중의 오차는 ±5</em>이며 방문자가 입력한 체중이 적정 체중일 경우에는 “000님은 적정 체중입니다“를 아닐 경우에는 “000님은 적정 체중이 아닙니다“를 화면에 출력</p>
+<p><em>적정 평균 체중의 오차는 ±5</em>이며 계산 결과 방문자가 적정 체중인지 아닌지에 따라 화면에 다르게 출력</p>
+<ul>
+<li>적정 체중일 경우: “000님은 적정 체중입니다”</li>
+<li>적정 체중이 아닐 경우: “000님은 적정 체중이 아닙니다”<br><br></li>
+</ul>
 </li>
 </ul>
-  <details style="margin-left: 30px"><summary> 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let name = prompt("당신의 이름은?", "");
-let height = prompt("당신의 신장은?", "0");
-let weight = prompt("당신의 체중은?", "0");
-let normalWeight = (height – 100) * 0.9;
-let result = weight &gt;= normalWeight - 5 &amp;&amp; weight &lt;= normalWeight + 5;
+  <details style="margin-left: 50px"><summary> 코드 보기/숨기기(클릭)</summary>
+<pre><code class="language-JavaScript">let userName = prompt("당신의 이름은?", "");
+let userHeight = prompt("당신의 신장은?", "0");
+let userWeight = prompt("당신의 체중은?", "0");
+&lt;!-- 주의사항 산술연산자 빼기 입력 시 오류가 나면 숫자키패드에서 입력 --&gt;
+let normalWeight = (userHeight – 100) * 0.9;
+let rangeNormal 
+let result
+
+rangeNormal = userWeight &gt;= normalWeight - 5 &amp;&amp; userWeight &lt;= normalWeight + 5;
 result = result ? "적정 체중입니다." : "적정 체중이 아닙니다.";
-document.write(name + "님은" + " " + result);
+
+document.write(userName + "님은" + " " + result);
 </code></pre>
   </details><br> 
 <ul>
@@ -642,11 +669,12 @@ document.write(name + "님은" + " " + result);
 </ul>
 </li>
 </ul>
-  <details style="margin-left: 30px"><summary> 정답 코드 보기/숨기기(클릭)</summary>
+  <details style="margin-left: 50px"><summary> 정답 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-Javascript">let traffic = 3000;
 let food = 8000;
 let drink = 6000;
 let result = traffic + food + drink;
+
 result = result &gt; 10000? result-10000 + "원 초과" : "돈 관리 참 잘했어요!";
 document.write(result);
 </code></pre>

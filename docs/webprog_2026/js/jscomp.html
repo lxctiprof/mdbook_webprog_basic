@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-905ee23b.js";
+            window.path_to_searchindex_js = "../../searchindex-0d795b63.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-b9d2f279.js"></script>
@@ -198,9 +198,17 @@
 <li>
 <p>연산자는 산술, 문자결합, 대입, 증감, 비교, 논리, 삼항조건 연산자 등이 있음</p>
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let guGu1 = 1
+<pre><code class="language-JavaScript">let a = 1;
+const a = 1;
 
-document.write(guGu1);
+document.write(a);
+
+"가" + "나"
+1 === "1"
+1 != "1"
+1 &lt;= 2 &amp;&amp; 3 &lt; 5
+1 &lt;= 2 || 3 &gt; 5
+l &gt;= 5 ? "참" : "거짓";
 </code></pre>
   </details>
 </li>
@@ -213,17 +221,23 @@ document.write(guGu1);
 <li>
 <p>조건문(if / else / else if), 선택문(switch), 반복문(while / for)이 있음</p>
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
-<pre><code class="language-JavaScript">let guGu1 = 1
-let guGu2 = 2
-let guGu3 = 3
+<pre><code class="language-JavaScript">let a = 1
+let b = 2
+let c = 3
 
-document.write(guGu1 + "&lt;br&gt;");
-document.write(guGu2 + "&lt;br&gt;");
-document.write(guGu3 + "&lt;br&gt;");
+document.write(a + "&lt;br&gt;");
+document.write(b + "&lt;br&gt;");
+document.write(c + "&lt;br&gt;");
 
-/* for(guGu = 1; guGu &lt;= 3; guGu++){
-    document.write(guGu + "&lt;br&gt;");
-    } */
+if(a &lt;= 2){
+document.write("hello");
+} else{
+document.write("bye");
+}   
+
+for(a = 1; a &lt;= 3; a++){
+    document.write(a + "&lt;br&gt;");
+} 
 
 </code></pre>
 </details></li>
@@ -241,7 +255,7 @@ document.write(guGu3 + "&lt;br&gt;");
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-HTML">&lt;!-- HTML 코드 삽입 --&gt;
 &lt;input type="text" id="danSu" placeholder="생성할 구구단 단수를 입력"&gt;
-&lt;button onclick="guguDan()"&gt;구구단 만들기&lt;/button&gt;
+&lt;input type="button" value="구구단생성" onclick="guguDan()"&gt;
 </code></pre>
 <pre><code class="language-JavaScript">/* 자바스크립트 코드 삽입 */
 function guguDan(){
@@ -259,13 +273,13 @@ function guguDan(){
 <h3 id="21-등록하기-버튼-수정"><a class="header" href="#21-등록하기-버튼-수정">2.1. 등록하기 버튼 수정</a></h3>
 <ul>
 <li>
-<p>등록하기 버튼을 <code>&lt;button onclick = &gt;</code> 방식으로 수정하고, 버튼을 클릭하면 <code>regFunc()</code> 함수 호출</p>
+<p>등록하기 버튼을 클릭하면 <code>regFunc()</code> 함수 호출</p>
   <details><summary> 정답 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-HTML">&lt;!-- 자바스크립트 파일 링크 걸기 --&gt;
 &lt;script src = "script.js"&gt;&lt;/script&gt;
 
-&lt;!-- &lt;input type="button" value="등록하기"&gt; --&gt;
-&lt;button onclick="regFunc()"&gt;등록하기&lt;/button&gt;
+&lt;!-- button 수정 --&gt;
+&lt;input type="button" value="등록하기" onclick="regFunc()"&gt;
 </code></pre>
   </details>
 </li>

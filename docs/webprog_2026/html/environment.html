@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-905ee23b.js";
+            window.path_to_searchindex_js = "../../searchindex-0d795b63.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-b9d2f279.js"></script>
@@ -176,37 +176,43 @@
                 <div id="mdbook-content" class="content">
                     <main>
                         <h1 id="실습-환경-구성"><a class="header" href="#실습-환경-구성">실습 환경 구성</a></h1>
-<h2 id="1-visual-studio-code란"><a class="header" href="#1-visual-studio-code란">1. Visual Studio Code란?</a></h2>
+<h2 id="1-visual-studio-code-개요"><a class="header" href="#1-visual-studio-code-개요">1. Visual Studio Code 개요</a></h2>
 <ul>
 <li>
-<h3 id="마이크로소프트사에서-웹-개발을-위해-무료로-제공하는-편집기"><a class="header" href="#마이크로소프트사에서-웹-개발을-위해-무료로-제공하는-편집기">마이크로소프트사에서 <em>웹 개발을 위해 무료로 제공하는 편집기</em></a></h3>
+<h3 id="visual-studio-code란"><a class="header" href="#visual-studio-code란">Visual Studio Code란?</a></h3>
+<ul>
+<li>마이크로소프트사에서 <em>웹 개발을 위해 무료로 제공하는 편집기</em></li>
+</ul>
 </li>
 <li>
-<h3 id="대부분의-주요-플랫폼윈도우-맥os-리눅스에서-모두-사용-가능"><a class="header" href="#대부분의-주요-플랫폼윈도우-맥os-리눅스에서-모두-사용-가능">대부분의 <em>주요 플랫폼(윈도우, 맥OS, 리눅스)에서 모두 사용</em> 가능</a></h3>
+<h3 id="visual-studio-code-특징"><a class="header" href="#visual-studio-code-특징">Visual Studio Code 특징</a></h3>
+<ul>
+<li>
+<p>대부분의 <i>주요 플랫폼(윈도우, 맥OS, 리눅스)에서 모두 사용</i> 가능</p>
 <ul>
 <li>다양한 기능을 갖춘 대부분의 웹 편집기들은 윈도우나 메킨토시 등 특정 운영체제에서만 사용할 수 있고 유료인 경우가 많음</li>
 </ul>
 </li>
 <li>
-<h3 id="태그와-css-속성을-친절히-안내"><a class="header" href="#태그와-css-속성을-친절히-안내">태그와 CSS 속성을 <em>친절히 안내</em></a></h3>
+<p>태그와 CSS 속성을 <em>친절히 안내</em></p>
 <ul>
 <li>입력하는 동안 태그나 CSS 속성에 대한 간단한 설명이 표시되고 ⓘ를 클릭하면 자세한 설명 보기 가능</li>
 </ul>
 </li>
 <li>
-<h3 id="태그와-css-속성을-간편하게-입력-가능"><a class="header" href="#태그와-css-속성을-간편하게-입력-가능">태그와 CSS 속성을 <em>간편하게 입력</em> 가능</a></h3>
+<p>태그와 CSS 속성을 <em>간편하게 입력</em> 가능</p>
 <ul>
 <li>이름의 일부만 입력해도 그 단어가 포함된 목록이 표시되어 손쉽게 선택 가능하고, &lt;/까지만 입력하면 닫는 태그가 자동으로 추가</li>
 </ul>
 </li>
 <li>
-<h3 id="손쉽게-확장-가능"><a class="header" href="#손쉽게-확장-가능"><em>손쉽게 확장</em> 가능</a></h3>
+<p><em>손쉽게 확장</em> 가능</p>
 <ul>
 <li>
 <p>웹 개발을 할 때 확장이라는 기능을 통해 다양한 도구를 사용 가능하고 이를 통해 좀 더 작업이 쉬워짐</p>
-<ul>
-<li>프로그램의 인터페이스를 한글 버전으로 바꿔주는 기능(Korean Language Pack), 수정한 소스를 즉시 웹 브라우저에서 결과를 확인할 수 있는 기능(Live Server) 등</li>
-</ul>
+</li>
+<li>
+<p>프로그램의 인터페이스를 한글 버전으로 바꿔주는 기능(Korean Language Pack), 수정한 소스를 즉시 웹 브라우저에서 결과를 확인할 수 있는 기능(Live Server) 등</p>
 </li>
 <li>
 <p>마켓플레이스(https://marketplace.visualstudio.com/vscode)를 이용하면 C#을 비롯해 파이썬, Go, AngularJS 등 최신 웹 기술들을 비주얼 스튜디오 코드 안에 통합해 사용 가능</p>
@@ -214,44 +220,52 @@
 </ul>
 </li>
 </ul>
-<h2 id="2-visual-studio-code-설치"><a class="header" href="#2-visual-studio-code-설치">2. Visual Studio Code 설치</a></h2>
+</li>
+</ul>
+<h2 id="2-visual-studio-code-설치-및-환경설정"><a class="header" href="#2-visual-studio-code-설치-및-환경설정">2. Visual Studio Code 설치 및 환경설정</a></h2>
 <ul>
 <li>
-<h3 id="visual-studio-code-홈페이지로-접속한-후-download-for-windows-버튼을-클릭"><a class="header" href="#visual-studio-code-홈페이지로-접속한-후-download-for-windows-버튼을-클릭">Visual Studio Code 홈페이지로 접속한 후 <em>Download for Windows 버튼</em>을 클릭</a></h3>
+<h3 id="visual-studio-code-설치"><a class="header" href="#visual-studio-code-설치">Visual Studio Code 설치</a></h3>
+<ul>
+<li>
+<p>Visual Studio Code 홈페이지로 접속한 후 <em>Download for Windows 버튼</em>을 클릭</p>
 <ul>
 <li>https://code.visualstudio.com</li>
 </ul>
 </li>
 <li>
-<h3 id="라이선스-동의-후-설치-폴더를-선택하고-다음-버튼을-클릭"><a class="header" href="#라이선스-동의-후-설치-폴더를-선택하고-다음-버튼을-클릭"><em>라이선스 동의 후 설치 폴더를 선택</em>하고, 다음 버튼을 클릭</a></h3>
-  <img src="../images/install01.png" width="90%" height="90%">
+<p><em>라이선스 동의 후 설치 폴더를 선택</em>하고, 다음 버튼을 클릭<br><br>
+<img src="../images/install01.png" width="90%" height="90%"></p>
 </li>
 <li>
-<h3 id="시작-메뉴-폴더-및-추가-작업을-선택하고-여기서-기타에-표시된-항목은-반드시-체크"><a class="header" href="#시작-메뉴-폴더-및-추가-작업을-선택하고-여기서-기타에-표시된-항목은-반드시-체크">시작 메뉴 폴더 및 추가 작업을 선택하고, 여기서 <em>기타에 표시된 항목은 반드시 체크</em></a></h3>
-  <img src="../images/install02.png" width="90%" height="90%">
+<p>시작 메뉴 폴더 및 추가 작업을 선택하고, 여기서 <em>기타에 표시된 항목은 반드시 체크</em><br><br>
+<img src="../images/install02.png" width="90%" height="90%"></p>
 </li>
 <li>
-<h3 id="설치가-완료되면-프로그램-실행"><a class="header" href="#설치가-완료되면-프로그램-실행">설치가 완료되면 프로그램 실행</a></h3>
-  <img src="../images/install03.png" width="90%" height="90%">
+<p>설치가 완료되면 프로그램 실행<br><br>
+<img src="../images/install03.png" width="90%" height="90%"></p>
 </li>
-</ul>
-<h2 id="3-visual-studio-code-환경-설정"><a class="header" href="#3-visual-studio-code-환경-설정">3. Visual Studio Code 환경 설정</a></h2>
-<ul>
-<li>
-<h3 id="korean-language-pack-for-visual-studio-code-설치"><a class="header" href="#korean-language-pack-for-visual-studio-code-설치">Korean Language Pack for Visual Studio Code 설치</a></h3>
-<ul>
-<li>기본 언어를 한글로 바꾸기 위해 <em>확장 아이콘을 클릭</em>하고, 검색 창에 <em>Korean language</em>를 입력하고 검색 결과를 선택하여 <em>[Install] 또는 [설치] 버튼</em>을 클릭(재 시작해야 함)<br><img src="../images/environ01.png"></li>
 </ul>
 </li>
 <li>
-<h3 id="라이브-서버live-server-확장-설치"><a class="header" href="#라이브-서버live-server-확장-설치">라이브 서버(Live Server) 확장 설치</a></h3>
+<h3 id="visual-studio-code-환경-설정"><a class="header" href="#visual-studio-code-환경-설정">Visual Studio Code 환경 설정</a></h3>
 <ul>
-<li><em>확장 아이콘을 클릭</em>하고, 검색 창에 <em>Live Server</em>를 입력한 후 목록에서 제작자가 <em>Ritwick Dey</em>인 확장을 선택하여 <em>[Install] 또는 [설치] 버튼</em>을 클릭
+<li>
+<p>Korean Language Pack for Visual Studio Code 설치</p>
+<ul>
+<li>기본 언어를 한글로 바꾸기 위해 <em>확장 아이콘을 클릭</em>하고, 검색 창에 <em>Korean language</em>를 입력하고 검색 결과를 선택하여 <em>[Install] 또는 [설치] 버튼</em>을 클릭(재 시작해야 함)<br><br>
+<img src="../images/environ01.png"></li>
+</ul>
+</li>
+<li>
+<p>라이브 서버(Live Server) 확장 설치</p>
+<ul>
+<li><em>확장 아이콘을 클릭</em>하고, 검색 창에 <em>Live Server</em>를 입력한 후 목록에서 제작자가 <em>Ritwick Dey</em>인 확장을 선택하여 <em>[Install] 또는 [설치] 버튼</em>을 클릭<br><br>
 <img src="../images/environ04.png"></li>
 </ul>
 </li>
 <li>
-<h3 id="인터페이스-설정"><a class="header" href="#인터페이스-설정">인터페이스 설정</a></h3>
+<p>인터페이스 설정</p>
 <ul>
 <li>
 <p><em>설정 &gt; 테마</em>에서 인터페이스의 색 테마, 파일 아이콘 테마, 제품 아이콘 테마 설정</p>
@@ -259,6 +273,8 @@
 <li>
 <p><em>Font Size, Mouse Wheel Zoom, Word Wrap, Tab Size</em> 등을 검색하여 항목 설정<br><br>
 <img src="../images/environ02.png"></p>
+</li>
+</ul>
 </li>
 </ul>
 </li>

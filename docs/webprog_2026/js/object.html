@@ -36,7 +36,7 @@
             const path_to_root = "../../";
             const default_light_theme = "light";
             const default_dark_theme = "navy";
-            window.path_to_searchindex_js = "../../searchindex-905ee23b.js";
+            window.path_to_searchindex_js = "../../searchindex-0d795b63.js";
         </script>
         <!-- Start loading toc.js asap -->
         <script src="../../toc-b9d2f279.js"></script>
@@ -181,11 +181,12 @@
 <li>
 <h3 id="객체의-개념"><a class="header" href="#객체의-개념">객체의 개념</a></h3>
 <ul>
-<li>자바스크립트는 <em>객체(Object) 기반 언어</em>로 객체는 기능과 속성을 가지고 있음<br><br>
+<li>
+<p>자바스크립트는 <em>객체(Object) 기반 언어</em>로 객체는 기능과 속성을 가지고 있음</p>
 <ul>
 <li>기본형: <code>객체.메서드();</code><br>
        객체.속성; 또는 객체.속성 = 값;<br><br>
-<img src="../images/js15.jpg" width="70%" height="70%"></li>
+<img src="../images/js15.jpg" width="50%" height="50%"></li>
 </ul>
 </li>
 </ul>
@@ -210,7 +211,8 @@
 <li>
 <p>문서 객체 모델(Document Object Model)</p>
 <ul>
-<li><em>HTML 문서 구조를 객체로 표현</em>한 것</li>
+<li><em>HTML 문서 구조를 객체로 표현</em>한 것<br>
+(예: open, prompt, confirm, alert 객체 등)</li>
 </ul>
 </li>
 </ul>
@@ -224,43 +226,28 @@
 <li>
 <p>브라우저가 이해할 수 있는 형태로 HTML 문서를 모델로 구성하여 메모리에 생성되는데, 이때 모델은 <em>객체의 트리</em>로 구성</p>
 <ul>
-<li>하나의 최상위 노드(node)에서 다른 자식 노드들이 뻗어나가는 구조로 트리(나무가지) 자료 구조라 함<br><br>
-<img src="../images/js16.jpg" width="100%" height="100%"></li>
+<li>
+<p>하나의 최상위 노드(node)에서 다른 자식 노드들이 뻗어나가는 구조로 트리(나무가지) 자료 구조라 함</p>
+</li>
+<li>
+<p>문서노드(document node):DOM tree에 접근하기 위한 시작점으로 최상위에 존재</p>
+</li>
+<li>
+<p>요소 노드(element node): <code>&lt;html&gt;</code>, <code>&lt;body&gt;</code>, <code>&lt;div&gt;</code> 등 html의 요소를 표현</p>
+</li>
+<li>
+<p>어트리뷰트 노드(attribute node): HTML 요소의 attribute로 HTML 요소의 자식이 아닌 일부</p>
+</li>
+<li>
+<p>텍스트 노드(text node): DOM tree의 최하단에 있는 노드로 텍스트로 표현된 요소 노드의 자식 요소 <br>
+<img src="../images/js16.jpg" width="100%" height="100%"></p>
+</li>
 </ul>
 </li>
 <li>
 <p>HTML의 모든 요소와 요소의 attribute, text 등을 각각의 객체로 만들고, 이들 관계를 부자 관계로 표현</p>
 <ul>
 <li><code>&lt;body&gt;</code>는 <code>&lt;html&gt;</code>의 자식 노드(child node), <code>&lt;head&gt;</code>와 형제 노드(sibling node), <code>&lt;a&gt;</code> 태그의 부모 노드(parent node)</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>
-<h3 id="dom-tree-노드의-종류"><a class="header" href="#dom-tree-노드의-종류">DOM tree 노드의 종류</a></h3>
-<ul>
-<li>
-<p>문서 노드(Document Node)</p>
-<ul>
-<li>DOM tree에 접근하기 위한 시작점으로 최상위에 존재</li>
-</ul>
-</li>
-<li>
-<p>요소 노드(Element Node)</p>
-<ul>
-<li><code>&lt;html&gt;</code>, <code>&lt;body&gt;</code>, <code>&lt;div&gt;</code> 등 html의 요소를 표현</li>
-</ul>
-</li>
-<li>
-<p>어트리뷰트 노드(Attribute Node)</p>
-<ul>
-<li>HTML 요소의 attribute로 HTML 요소의 자식이 아닌 일부</li>
-</ul>
-</li>
-<li>
-<p>텍스트 노드(Text Node)</p>
-<ul>
-<li>DOM tree의 최하단에 있는 노드로 텍스트로 표현된 요소 노드의 자식 요소</li>
 </ul>
 </li>
 </ul>
@@ -275,7 +262,7 @@
 <p>HTML 문서 내에서 <em>주어진 문자열과 값이 일치하는 id 속성의 값을 가진 요소 객체를 반환</em></p>
 </li>
 <li>
-<p>id 속성의 값은 HTML에서 <em>고유하고 유일</em>해야 하기 떄문에 이 함수를 사용해서 요소를 빠르게 찾을 때 유용</p>
+<p>id 속성의 값은 HTML에서 <em>고유하고 유일</em>해야 하기 때문에 이 함수를 사용해서 요소를 빠르게 찾을 때 유용</p>
 </li>
 </ul>
 </li>
@@ -291,7 +278,7 @@
 </ul>
 </li>
 <li>
-<p><code>&lt;input&gt;</code>로 다음 그림과 같이 나타나도록 HTML 태그를 작성하고, 이름 란에 방문자가 이름을 입력하고 <em>인사하기 버튼을 클릭하면 입력한 값을 가져와서 메세지를 출력</em>해 봅시다.<br><br>
+<p><code>&lt;input&gt;</code>으로 다음 그림과 같이 나타나도록 HTML 태그를 작성하고, 이름 란에 방문자가 이름을 입력하고 <em>인사하기 버튼을 클릭하면 입력한 값을 가져와서 메세지를 출력</em>해 봅시다.<br><br>
 <img src="../images/js17.jpg" width="50%" height="50%"></p>
 <ul>
 <li>
@@ -304,7 +291,7 @@
   <details><summary> 예제 코드 보기/숨기기(클릭)</summary>
 <pre><code class="language-HTML">&lt;!-- HTML 코드를 먼저 삽입해 주세요. --&gt;
 &lt;input type="text" id="userName" placeholder="이름을 입력하세요"&gt;
-&lt;button onclick="sayHello()"&gt;인사하기&lt;/button&gt;
+&lt;input type="button" value="인사하기" onclick="sayHello()"&gt;
 </code></pre>
 <pre><code class="language-JavaScript">function sayHello() {
     let name = document.getElementById('userName').value;
