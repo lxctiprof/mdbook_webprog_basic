@@ -1,0 +1,1163 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>관계형 데이터베이스 체험관</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#ffffff; --ink:#1f2328; --sub:#5b616b; --line:#e3dfd6;
+    --accent:#2f6fdb; --accent-soft:#e6eefc; --good:#1f8a5b; --good-soft:#e3f4ec;
+    --bad:#c4402f; --bad-soft:#fbe9e6; --warn:#b7791f; --warn-soft:#fdf3e1;
+    --hl:#fff1b8; --code:#14213d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+    font-size:15px;line-height:1.65}
+  header{padding:18px 28px 10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0;letter-spacing:-.3px}
+  header h1 span{color:var(--accent)}
+  .stepsBar{display:flex;gap:12px;align-items:flex-start;padding:0 28px 14px}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+  .sqlToggle{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:999px;
+    padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;user-select:none}
+  .sqlToggle input{margin:0;width:15px;height:15px;accent-color:var(--code);cursor:pointer}
+  .sqlToggle:has(input:checked){background:var(--code);color:#fff;border-color:var(--code)}
+  body.sql-off .sql, body.sql-off .sqlLabel, body.sql-off .sql-only{display:none!important}
+  body:not(.sql-off) .nosql-only{display:none!important}
+  .steps button{border:1px solid var(--line);background:var(--panel);color:var(--sub);
+    border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+  .steps button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .steps button.done{color:var(--good);border-color:#b9dfcb}
+  main{display:grid;grid-template-columns:minmax(340px,1fr) minmax(380px,1.15fr);gap:20px;padding:0 28px 28px;align-items:start}
+  main > *{min-width:0}
+  @media (max-width:900px){
+    main{grid-template-columns:1fr;padding:0 12px 20px}
+    header,.stepsBar{padding-left:12px;padding-right:12px}
+    #dbCard{position:static}
+    .card{padding:18px 16px}
+    .grid3{grid-template-columns:1fr}
+    label.f{grid-template-columns:1fr}
+  }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  #dbCard{position:sticky;top:12px}
+  h2{font-size:22px;margin:0 0 6px;letter-spacing:-.4px}
+  h3{font-size:15px;margin:20px 0 6px}
+  p{margin:8px 0}
+  .muted{color:var(--sub)}
+  .term{background:var(--accent-soft);color:var(--accent);padding:0 5px;border-radius:4px;font-weight:600}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  .mini{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfaf7}
+  .mini b{display:block;margin-bottom:2px}
+  .mini small{color:var(--sub)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .chip{border-radius:8px;padding:6px 10px;font-weight:600;font-size:14px}
+  .c-ins{background:var(--good-soft);color:var(--good)}
+  .c-sel{background:var(--accent-soft);color:var(--accent)}
+  .c-upd{background:var(--warn-soft);color:var(--warn)}
+  .c-del{background:var(--bad-soft);color:var(--bad)}
+  .nav{display:flex;justify-content:space-between;margin-top:24px;gap:8px}
+  button.btn{font:inherit;border:0;border-radius:9px;padding:9px 16px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff}
+  button.btn:hover{filter:brightness(1.07)}
+  button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.btn.green{background:var(--good)}
+  button.btn.red{background:var(--bad)}
+  button.btn.orange{background:var(--warn)}
+  button.btn.small{padding:5px 10px;font-size:13px}
+  button.btn:disabled{opacity:.4;cursor:default}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  label.f{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:6px 0}
+  label.f span{color:var(--sub);font-size:14px}
+  input,select,textarea{font:inherit;border:1px solid #cfcac0;border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .sql{background:var(--code);color:#e8ecf5;border-radius:10px;padding:12px 14px;font-family:"D2Coding","Consolas","Menlo",monospace;
+    font-size:14px;white-space:pre-wrap;word-break:break-all;margin:8px 0}
+  .sql .k{color:#7fb4ff;font-weight:700}
+  .sql .s{color:#ffd28a}
+  .sql .n{color:#9be3b0}
+  .sqlLabel{font-size:12px;color:var(--sub);margin-top:14px}
+  .msg{border-radius:10px;padding:10px 13px;margin:10px 0;font-size:14px}
+  .msg.ok{background:var(--good-soft);color:#155f3f}
+  .msg.err{background:var(--bad-soft);color:#8e2a1e}
+  .msg.info{background:var(--accent-soft);color:#1f4c99}
+  .msg.warn{background:var(--warn-soft);color:#7a4f0e}
+  .tip{border-left:3px solid var(--warn);padding:4px 12px;margin:12px 0;color:#6b4a12;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14px}
+
+  /* 데이터베이스 표 */
+  .dbHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .dbHead h2{font-size:17px}
+  .tbl{margin:14px 0 4px}
+  .tblName{font-weight:700;font-size:14px;margin-bottom:4px;display:flex;gap:8px;align-items:baseline}
+  .tblName small{font-weight:400;color:var(--sub)}
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:#f2efe8;font-weight:700;font-size:13px}
+  th .ty{display:block;font-weight:400;font-size:11px;color:var(--sub)}
+  tr:last-child td{border-bottom:0}
+  #dbView td{cursor:pointer}
+  #dbView tbody tr:hover td{background:#faf8f3}
+  td.null{color:#aaa;font-style:italic}
+  tr.hl td{background:var(--hl)!important}
+  tr.sel td{background:#dbe7fd!important}
+  tr.flash td{animation:flash 1.6s ease-out}
+  @keyframes flash{0%{background:#9fe0bd}100%{background:transparent}}
+  .fcol{background:#fff8d6!important}
+  .frow td{background:#eef4ff!important}
+  td.fcell{background:#ffd966!important;font-weight:700}
+  .pk{color:var(--warn)}
+  .result .scroll{margin-top:6px}
+  .examples{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+  .examples button{text-align:left;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:12.5px;background:#f6f4ef;border:1px solid var(--line);
+    border-radius:8px;padding:6px 9px;cursor:pointer;color:var(--code)}
+  .examples button:hover{border-color:var(--accent)}
+  textarea{width:100%;min-height:110px;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:14px}
+  .cheat{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:8px 0}
+  .cheat code{font-family:"D2Coding","Consolas","Menlo",monospace;color:var(--accent);font-weight:700}
+  .history{font-family:"D2Coding","Consolas","Menlo",monospace;font-size:12.5px;color:var(--sub);max-height:140px;overflow:auto}
+  .history div{padding:3px 0;border-bottom:1px dashed var(--line)}
+  .history .x{color:var(--bad)}
+  .gloss{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:10px 0}
+  .gloss b{white-space:nowrap}
+  ul{padding-left:20px;margin:6px 0}
+  .linkbox{display:flex;gap:10px;align-items:center;justify-content:center;margin:12px 0;font-size:14px;flex-wrap:wrap}
+  .linkbox .tag{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fbfaf7}
+  .linkbox .arrow{color:var(--accent);font-weight:700}
+  .bd{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:0 5px;margin:2px 3px 0 0;white-space:nowrap}
+  .bd.pk{background:var(--warn-soft);color:var(--warn)}
+  .bd.uq{background:#f3e8ff;color:#7a3db8}
+  .bd.fk{background:var(--accent-soft);color:var(--accent)}
+  .bd.rq{background:#eee;color:var(--sub)}
+  .exp{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;background:#fcfbf8}
+  .exp b.t{display:block;margin-bottom:4px}
+  .quiz{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+  .quiz .q{font-weight:700;margin-bottom:6px}
+  .quiz .row{margin:4px 0}
+  .compare{width:100%;margin:10px 0}
+  .compare td,.compare th{white-space:normal}
+  .boxes{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:12px 0}
+  .box{border:1px solid var(--line);border-radius:8px;padding:6px 0;text-align:center;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:13px;background:#fff;transition:all .15s}
+  .box.look{background:#ffd966;border-color:#e0b100;transform:scale(1.06)}
+  .box.found{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:700}
+  .box.out{opacity:.25}
+  .bars{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center;margin:10px 0;font-size:14px}
+  .bar{height:16px;border-radius:5px;min-width:3px}
+  .bar.lin{background:var(--bad)}
+  .bar.bin{background:var(--good)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .bd.fk{background:var(--accent-soft);color:var(--accent)}
+  .rel{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:12px 0}
+  .rel .mini b{font-size:15px}
+  .rel .mini .ex{display:block;margin-top:4px;font-size:13px;color:var(--ink)}
+  .split{display:flex;align-items:center;gap:10px;flex-wrap:wrap;justify-content:center;margin:12px 0;font-size:14px}
+  .split .tag{border:1px solid var(--line);border-radius:8px;padding:8px 12px;background:#fbfaf7;text-align:center}
+  .split .arrow{color:var(--accent);font-weight:700;font-size:18px}
+</style>
+</head>
+<body class="sql-off">
+<header>
+  <h1>관계형 데이터베이스 <span>체험관</span></h1>
+  <span class="muted">표를 나누고, 이어 붙이는 데이터베이스</span>
+</header>
+<div class="stepsBar">
+  <div class="steps" id="steps"></div>
+  <label class="sqlToggle" title="SQL(데이터베이스에게 말을 거는 언어) 관련 내용 보이기/감추기"><input type="checkbox" id="sqlToggle"> SQL</label>
+</div>
+<main>
+  <section class="card" id="lesson"></section>
+  <section class="card" id="dbCard">
+    <div class="dbHead">
+      <h2>🗄️ '우리 회사' 데이터베이스</h2>
+      <button class="btn ghost small" id="resetBtn">처음 상태로 되돌리기</button>
+    </div>
+    <div class="muted" style="font-size:13px">지금 데이터베이스 안에 실제로 들어 있는 내용이에요. <span class="bd pk">🔑</span> 기본 키, <span class="bd fk">🔗</span> 다른 표와 연결된 칸(외래 키)이에요.</div>
+    <div id="dbView"></div>
+  </section>
+</main>
+
+<script>
+/* =========================================================
+   1. 여러 표와 관계를 다루는 아주 작은 데이터베이스 엔진
+   ========================================================= */
+const SEED = {
+  한표명부: {
+    columns: [
+      {name:'사번', type:'num', pk:true},
+      {name:'이름', type:'text', required:true},
+      {name:'직급', type:'text'},
+      {name:'부서이름', type:'text'},
+      {name:'부서위치', type:'text'},
+    ],
+    rows: [
+      {사번:1001, 이름:'김민준', 직급:'부장', 부서이름:'개발팀', 부서위치:'5층'},
+      {사번:1002, 이름:'이서연', 직급:'대리', 부서이름:'영업팀', 부서위치:'3층'},
+      {사번:1003, 이름:'박도윤', 직급:'사원', 부서이름:'개발팀', 부서위치:'5층'},
+      {사번:1004, 이름:'최지우', 직급:'과장', 부서이름:'디자인팀', 부서위치:'4층'},
+      {사번:1005, 이름:'정하준', 직급:'대리', 부서이름:'영업팀', 부서위치:'3층'},
+      {사번:1006, 이름:'윤시우', 직급:'과장', 부서이름:'개발팀', 부서위치:'5층'},
+    ]
+  },
+  부서: {
+    columns: [
+      {name:'번호', type:'num', pk:true},
+      {name:'이름', type:'text', required:true},
+      {name:'위치', type:'text'},
+    ],
+    rows: [
+      {번호:1, 이름:'개발팀', 위치:'5층'},
+      {번호:2, 이름:'영업팀', 위치:'3층'},
+      {번호:3, 이름:'디자인팀', 위치:'4층'},
+      {번호:4, 이름:'인사팀', 위치:'2층'},
+    ]
+  },
+  직원: {
+    columns: [
+      {name:'사번', type:'num', pk:true},
+      {name:'이름', type:'text', required:true},
+      {name:'직급', type:'text'},
+      {name:'부서번호', type:'num', ref:{table:'부서', col:'번호'}},
+    ],
+    rows: [
+      {사번:1001, 이름:'김민준', 직급:'부장', 부서번호:1},
+      {사번:1002, 이름:'이서연', 직급:'대리', 부서번호:2},
+      {사번:1003, 이름:'박도윤', 직급:'사원', 부서번호:1},
+      {사번:1004, 이름:'최지우', 직급:'과장', 부서번호:3},
+      {사번:1005, 이름:'정하준', 직급:'대리', 부서번호:2},
+      {사번:1006, 이름:'윤시우', 직급:'과장', 부서번호:1},
+    ]
+  },
+  프로젝트: {
+    columns: [
+      {name:'번호', type:'num', pk:true},
+      {name:'이름', type:'text', required:true},
+      {name:'마감', type:'text'},
+    ],
+    rows: [
+      {번호:1, 이름:'AI 챗봇', 마감:'2026-12'},
+      {번호:2, 이름:'새 홈페이지', 마감:'2027-03'},
+      {번호:3, 이름:'해외 영업', 마감:'2027-01'},
+    ]
+  },
+  참여: {
+    columns: [
+      {name:'사번', type:'num', pk:true, ref:{table:'직원', col:'사번'}},
+      {name:'프로젝트번호', type:'num', pk:true, ref:{table:'프로젝트', col:'번호'}},
+      {name:'역할', type:'text'},
+    ],
+    rows: [
+      {사번:1001, 프로젝트번호:1, 역할:'책임자'},
+      {사번:1003, 프로젝트번호:1, 역할:'개발'},
+      {사번:1006, 프로젝트번호:1, 역할:'개발'},
+      {사번:1001, 프로젝트번호:2, 역할:'책임자'},
+      {사번:1003, 프로젝트번호:2, 역할:'개발'},
+      {사번:1002, 프로젝트번호:3, 역할:'책임자'},
+      {사번:1005, 프로젝트번호:3, 역할:'영업'},
+    ]
+  },
+};
+/* 처음에는 부서 이름(글자)을 키로 쓰는 버전 */
+const SEED_NAME = {
+  부서: {
+    columns: [
+      {name:'이름', type:'text', pk:true},
+      {name:'위치', type:'text'},
+    ],
+    rows: SEED.부서.rows.map(r => ({이름:r.이름, 위치:r.위치}))
+  },
+  직원: {
+    columns: [
+      {name:'사번', type:'num', pk:true},
+      {name:'이름', type:'text', required:true},
+      {name:'직급', type:'text'},
+      {name:'부서명', type:'text', ref:{table:'부서', col:'이름'}},
+    ],
+    rows: SEED.직원.rows.map(r => ({사번:r.사번, 이름:r.이름, 직급:r.직급, 부서명:SEED.부서.rows.find(d => d.번호===r.부서번호).이름}))
+  }
+};
+let db, ridSeq = 1, schema = 'name';
+const clone = o => JSON.parse(JSON.stringify(o));
+const addRids = t => (t.rows.forEach(r => r.__rid = ridSeq++), t);
+function resetDB(sch = 'name'){
+  db = clone(SEED);
+  if (sch==='name'){ db.부서 = clone(SEED_NAME.부서); db.직원 = clone(SEED_NAME.직원); }
+  for (const t of Object.values(db)) addRids(t);
+  schema = sch;
+}
+/* 지금 들어 있는 데이터를 그대로 두고, 부서에 숫자 ID를 붙여 바꾸기 */
+function toIdSchema(){
+  if (schema==='id') return;
+  const idOf = new Map();
+  const deps = db.부서.rows.map((d,i) => { idOf.set(d.이름, i+1); return {번호:i+1, 이름:d.이름, 위치:d.위치, __rid:d.__rid}; });
+  db.부서 = {columns: clone(SEED.부서.columns), rows: deps};
+  db.직원 = {columns: clone(SEED.직원.columns),
+    rows: db.직원.rows.map(r => ({사번:r.사번, 이름:r.이름, 직급:r.직급, 부서번호: r.부서명==null ? null : idOf.get(r.부서명), __rid:r.__rid}))};
+  schema = 'id';
+}
+function toNameSchema(){
+  if (schema==='name') return;
+  db.부서 = addRids(clone(SEED_NAME.부서)); db.직원 = addRids(clone(SEED_NAME.직원));
+  schema = 'name';
+}
+resetDB();
+
+class SqlError extends Error {}
+const KW = new Set(['SELECT','FROM','WHERE','AND','OR','NOT','INSERT','INTO','VALUES','UPDATE','SET','DELETE',
+  'ORDER','BY','ASC','DESC','LIMIT','JOIN','INNER','ON','LIKE','AS','NULL','IS','COUNT']);
+
+function tokenize(src){
+  const toks = [];
+  const re = /\s+|--[^\n]*|'((?:[^']|'')*)'|"((?:[^"]|"")*)"|(-?\d+(?:\.\d+)?)|([\p{L}_][\p{L}\p{N}_]*)|(<=|>=|<>|!=|==|[=<>(),.*;])/uy;
+  let i = 0;
+  while (i < src.length){
+    re.lastIndex = i;
+    const m = re.exec(src);
+    if (!m){
+      if (src[i] === "'" || src[i] === '"') throw new SqlError(`따옴표(${src[i]})가 열렸는데 닫히지 않았어요. 글자 값은 '김민준' 처럼 앞뒤를 모두 감싸 주세요.`);
+      throw new SqlError(`'${src[i]}' 기호는 이해하지 못했어요.`);
+    }
+    i = re.lastIndex;
+    if (m[1] !== undefined) toks.push({t:'str', v:m[1].replace(/''/g,"'")});
+    else if (m[2] !== undefined) toks.push({t:'str', v:m[2].replace(/""/g,'"')});
+    else if (m[3] !== undefined) toks.push({t:'num', v:Number(m[3])});
+    else if (m[4] !== undefined){
+      const up = m[4].toUpperCase();
+      if (KW.has(up)) toks.push({t:'kw', v:up}); else toks.push({t:'id', v:m[4]});
+    }
+    else if (m[5] !== undefined) toks.push({t:'sym', v: m[5]==='==' ? '=' : m[5]});
+  }
+  return toks;
+}
+
+function parse(src){
+  const toks = tokenize(src);
+  let p = 0;
+  const peek = () => toks[p];
+  const isKw = k => toks[p] && toks[p].t==='kw' && toks[p].v===k;
+  const isSym = s => toks[p] && toks[p].t==='sym' && toks[p].v===s;
+  const eatKw = k => { if (isKw(k)){ p++; return true; } return false; };
+  const eatSym = s => { if (isSym(s)){ p++; return true; } return false; };
+  const near = () => toks[p] ? ` ('${toks[p].v}' 근처)` : ' (문장 끝)';
+  const needKw = (k, msg) => { if (!eatKw(k)) throw new SqlError((msg || `여기에 ${k} 가 와야 해요.`) + near()); };
+  const needSym = (s, msg) => { if (!eatSym(s)) throw new SqlError((msg || `여기에 '${s}' 기호가 와야 해요.`) + near()); };
+  const ident = what => {
+    const t = toks[p];
+    if (t && t.t==='id'){ p++; return t.v; }
+    throw new SqlError(`여기에 ${what} 이름이 와야 해요.` + near());
+  };
+  const colref = () => {
+    const a = ident('열(칸)');
+    if (eatSym('.')) return {k:'col', table:a, col:ident('열(칸)')};
+    return {k:'col', col:a};
+  };
+  function expr(){ return orE(); }
+  function orE(){ let l = andE(); while (eatKw('OR')) l = {k:'or', l, r:andE()}; return l; }
+  function andE(){ let l = notE(); while (eatKw('AND')) l = {k:'and', l, r:notE()}; return l; }
+  function notE(){ if (eatKw('NOT')) return {k:'not', e:notE()}; return cmp(); }
+  function cmp(){
+    const l = prim();
+    if (eatKw('IS')){ const neg = eatKw('NOT'); needKw('NULL', 'IS 다음에는 NULL(비어 있음)이 와야 해요.'); return {k:'isnull', e:l, neg}; }
+    let neg = false;
+    if (isKw('NOT') && toks[p+1] && toks[p+1].v==='LIKE'){ p++; neg = true; }
+    if (eatKw('LIKE')) return {k:'like', l, r:prim(), neg};
+    const t = peek();
+    if (t && t.t==='sym' && ['=','!=','<>','<','>','<=','>='].includes(t.v)){ p++; return {k:'cmp', op:t.v, l, r:prim()}; }
+    return l;
+  }
+  function prim(){
+    const t = peek();
+    if (!t) throw new SqlError('문장이 중간에 끝났어요. 뒤에 무언가가 더 있어야 해요.');
+    if (t.t==='num' || t.t==='str'){ p++; return {k:'lit', v:t.v}; }
+    if (isKw('NULL')){ p++; return {k:'lit', v:null}; }
+    if (eatSym('(')){ const e = expr(); needSym(')', "괄호 ')' 가 닫히지 않았어요."); return e; }
+    if (t.t==='id') return colref();
+    throw new SqlError(`'${t.v}'는 이 자리에 올 수 없어요.`);
+  }
+
+  let stmt;
+  if (eatKw('SELECT')){
+    const items = [];
+    do {
+      let it;
+      if (eatSym('*')) it = {k:'star'};
+      else if (eatKw('COUNT')){
+        needSym('(', "COUNT 다음에는 '(' 가 와야 해요. 예: COUNT(*)");
+        let cc = null;
+        if (!eatSym('*')) cc = colref();
+        needSym(')', "COUNT( 의 괄호가 닫히지 않았어요.");
+        it = {k:'count', col:cc};
+      } else it = {k:'expr', e:colref()};
+      if (eatKw('AS')) it.as = ident('별명');
+      items.push(it);
+    } while (eatSym(','));
+    needKw('FROM', 'SELECT 로 보여줄 칸을 적은 다음에는 FROM 표이름 이 와야 해요.');
+    const from = ident('표');
+    const joins = [];
+    while (isKw('INNER') || isKw('JOIN')){
+      eatKw('INNER'); needKw('JOIN');
+      const t = ident('표');
+      needKw('ON', 'JOIN 표이름 다음에는 ON 으로 어떻게 연결할지 적어야 해요.');
+      joins.push({table:t, on:expr()});
+    }
+    let where = null, order = [], limit = null;
+    if (eatKw('WHERE')) where = expr();
+    if (eatKw('ORDER')){
+      needKw('BY', 'ORDER 다음에는 BY 가 와야 해요. (ORDER BY)');
+      do { const c = colref(); let desc = false; if (eatKw('DESC')) desc = true; else eatKw('ASC'); order.push({c, desc}); } while (eatSym(','));
+    }
+    if (eatKw('LIMIT')){ const t = peek(); if (!t || t.t!=='num') throw new SqlError('LIMIT 다음에는 숫자가 와야 해요.'); p++; limit = t.v; }
+    stmt = {type:'select', items, from, joins, where, order, limit};
+  }
+  else if (eatKw('INSERT')){
+    needKw('INTO', 'INSERT 다음에는 INTO 가 와야 해요. (INSERT INTO)');
+    const table = ident('표');
+    let cols = null;
+    if (eatSym('(')){ cols = []; do cols.push(ident('열(칸)')); while (eatSym(',')); needSym(')'); }
+    needKw('VALUES', '입력할 값 앞에는 VALUES 가 와야 해요.');
+    const tuples = [];
+    do {
+      needSym('(', "VALUES 다음에는 ( 값, 값, ... ) 모양으로 적어요.");
+      const vals = [];
+      do {
+        const t = peek();
+        if (t && (t.t==='num' || t.t==='str')){ p++; vals.push(t.v); }
+        else if (isKw('NULL')){ p++; vals.push(null); }
+        else if (t && t.t==='id') throw new SqlError(`'${t.v}' 가 무엇인지 모르겠어요. 글자 값이라면 '${t.v}' 처럼 작은따옴표로 감싸 주세요.`);
+        else throw new SqlError('여기에 입력할 값(숫자나 \'글자\')이 와야 해요.' + near());
+      } while (eatSym(','));
+      needSym(')', "값 목록의 괄호 ')' 가 닫히지 않았어요.");
+      tuples.push(vals);
+    } while (eatSym(','));
+    stmt = {type:'insert', table, cols, tuples};
+  }
+  else if (eatKw('UPDATE')){
+    const table = ident('표');
+    needKw('SET', 'UPDATE 표이름 다음에는 SET 열 = 값 이 와야 해요.');
+    const sets = [];
+    do { const c = ident('열(칸)'); needSym('=', "SET 열 다음에는 '=' 가 와야 해요."); sets.push({col:c, e:prim()}); } while (eatSym(','));
+    let where = null;
+    if (eatKw('WHERE')) where = expr();
+    stmt = {type:'update', table, sets, where};
+  }
+  else if (eatKw('DELETE')){
+    needKw('FROM', 'DELETE 다음에는 FROM 이 와야 해요. (DELETE FROM 표이름)');
+    const table = ident('표');
+    let where = null;
+    if (eatKw('WHERE')) where = expr();
+    stmt = {type:'delete', table, where};
+  }
+  else {
+    const t = peek();
+    if (!t) throw new SqlError('아무것도 적혀 있지 않아요.');
+    throw new SqlError(`문장은 SELECT, INSERT, UPDATE, DELETE 중 하나로 시작해야 해요. ('${t.v}'로 시작했어요)`);
+  }
+  eatSym(';');
+  if (p < toks.length) throw new SqlError(`문장이 끝났어야 하는데 뒤에 더 있어요.` + near());
+  return stmt;
+}
+
+function getTable(name){
+  if (!db[name]) throw new SqlError(`'${name}'(이)라는 표는 없어요. 있는 표: ${Object.keys(db).join(', ')}`);
+  return db[name];
+}
+/* 받침에 맞는 조사 고르기: josa('개발팀','을','를') → '개발팀을' */
+function josa(word, a, b){
+  const w = String(word).replace(/['")\s]+$/,''), ch = w.charCodeAt(w.length-1);
+  let jong;
+  if (ch>=0xAC00 && ch<=0xD7A3) jong = (ch-0xAC00)%28 !== 0;
+  else if (/[0-9]$/.test(w)) jong = '013678'.includes(w.slice(-1));
+  else jong = false;
+  return word + (jong ? a : b);
+}
+const pkCols = t => t.columns.filter(c => c.pk);
+const label = (t, r) => r.이름 != null ? `'${r.이름}'` : pkCols(t).map(c => `${c.name} ${r[c.name]}`).join(', ');
+function toNum(v){
+  if (typeof v==='number') return v;
+  if (typeof v==='string' && /^-?\d+(\.\d+)?$/.test(v.trim())) return Number(v);
+  return null;
+}
+function cmpVals(a, b){
+  if (a==null || b==null) return null;
+  const na = toNum(a), nb = toNum(b);
+  if (na!==null && nb!==null) return na<nb ? -1 : na>nb ? 1 : 0;
+  return String(a).localeCompare(String(b), 'ko');
+}
+function qualify(tname, r){
+  const o = {__src:{[tname]: r.__rid}};
+  for (const c of db[tname].columns) o[tname+'.'+c.name] = r[c.name];
+  return o;
+}
+function resolve(row, ref){
+  if (ref.table){
+    const key = ref.table+'.'+ref.col;
+    if (key in row) return row[key];
+    if (!db[ref.table]) throw new SqlError(`'${ref.table}'(이)라는 표는 없어요.`);
+    throw new SqlError(`'${ref.table}' 표가 이 문장에 없거나, '${ref.col}' 열이 없어요.`);
+  }
+  const keys = Object.keys(row).filter(k => k!=='__src' && k.slice(k.indexOf('.')+1)===ref.col);
+  if (keys.length===1) return row[keys[0]];
+  if (keys.length===0) throw new SqlError(`'${ref.col}'(이)라는 열(칸)이 없어요. 혹시 글자 값이라면 '${ref.col}' 처럼 작은따옴표로 감싸 주세요.`);
+  throw new SqlError(`'${ref.col}'이(가) 어느 표의 열인지 헷갈려요. ${keys.join(' 또는 ')} 처럼 표 이름을 붙여 주세요.`);
+}
+function evalE(e, row){
+  switch (e.k){
+    case 'lit': return e.v;
+    case 'col': return resolve(row, e);
+    case 'cmp': {
+      const c = cmpVals(evalE(e.l,row), evalE(e.r,row));
+      if (c===null) return false;
+      return {'=':c===0, '!=':c!==0, '<>':c!==0, '<':c<0, '>':c>0, '<=':c<=0, '>=':c>=0}[e.op];
+    }
+    case 'like': {
+      const v = evalE(e.l,row), pat = evalE(e.r,row);
+      if (v==null || pat==null) return false;
+      const rx = new RegExp('^' + String(pat).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/%/g,'.*').replace(/_/g,'.') + '$', 'is');
+      return rx.test(String(v)) !== e.neg;
+    }
+    case 'isnull': { const v = evalE(e.e,row); return (v==null) !== e.neg; }
+    case 'and': return !!evalE(e.l,row) && !!evalE(e.r,row);
+    case 'or': return !!evalE(e.l,row) || !!evalE(e.r,row);
+    case 'not': return !evalE(e.e,row);
+  }
+}
+function coerce(col, v){
+  if (v===null || v===undefined || v===''){
+    if (col.pk) throw new SqlError(`'${col.name}' 칸은 기본 키라서 비워 둘 수 없어요.`);
+    if (col.required) throw new SqlError(`'${col.name}' 칸은 꼭 채워야 해요.`);
+    return null;
+  }
+  if (col.type==='num'){
+    const n = toNum(v);
+    if (n===null) throw new SqlError(`'${col.name}' 열에는 숫자만 입력할 수 있어요. '${v}'은(는) 숫자가 아니에요.`);
+    return n;
+  }
+  return String(v);
+}
+function checkKeys(t, finalRows, changed){
+  const pks = pkCols(t);
+  if (pks.length){
+    const key = r => pks.map(c => r[c.name]).join('|');
+    for (const r of changed){
+      const dup = finalRows.find(x => x!==r && key(x)===key(r));
+      if (dup) throw new SqlError(pks.length===1
+        ? (pks[0].type==='text'
+          ? `${josa("'"+r[pks[0].name]+"'",'은','는')} 이미 있는 ${pks[0].name}이에요. ${josa(pks[0].name,"이","가")} 기본 키라서 겹치면 안 돼요.`
+          : `${josa(pks[0].name+' '+r[pks[0].name],'은','는')} 이미 ${label(t,dup)}에게 있어요. 기본 키는 겹치면 안 돼요.`)
+        : `(${pks.map(c => `${c.name} ${r[c.name]}`).join(', ')}) 짝은 이미 있어요. 이 표의 기본 키는 두 칸을 묶은 것이라 같은 짝이 두 번 들어갈 수 없어요.`);
+    }
+  }
+  for (const c of t.columns) if (c.ref) for (const r of changed){
+    const v = r[c.name];
+    if (v==null) continue;
+    if (!db[c.ref.table].rows.some(x => cmpVals(x[c.ref.col], v)===0))
+      throw new SqlError(`${c.ref.table} 표에는 '${c.ref.col}' 값이 ${v}인 줄이 없어요. '${c.name}' 칸은 ${c.ref.table} 표와 연결되어 있어서, 실제로 있는 ${c.ref.table}만 가리킬 수 있어요.`);
+  }
+}
+function referrers(tname, row, ignore=[]){
+  const out = [];
+  for (const [tn, t] of Object.entries(db)) for (const c of t.columns){
+    if (!c.ref || c.ref.table!==tname) continue;
+    const rows = t.rows.filter(x => !ignore.includes(x) && x[c.name]!=null && cmpVals(x[c.name], row[c.ref.col])===0);
+    if (rows.length) out.push({table:tn, col:c.name, rows});
+  }
+  return out;
+}
+const refMsg = (tname, row, refs, verb) => {
+  const f = refs[0];
+  const names = f.rows.slice(0,3).map(r => r.이름 ?? `사번 ${r.사번}`).join(', ') + (f.rows.length>3 ? ' …' : '');
+  return `${tname} 표의 ${josa(label(db[tname],row),'은','는')} ${f.table} 표의 ${f.rows.length}줄(${names})과 연결되어 있어서 ${verb} 수 없어요. 연결이 끊어지면 그 줄들이 갈 곳을 잃거든요.`;
+};
+
+function execute(sql){
+  const s = parse(sql);
+  if (s.type==='select'){
+    const base = getTable(s.from);
+    let rows = base.rows.map(r => qualify(s.from, r));
+    let colKeys = base.columns.map(c => s.from+'.'+c.name);
+    const used = [s.from];
+    for (const j of s.joins){
+      const jt = getTable(j.table);
+      if (used.includes(j.table)) throw new SqlError('같은 표를 두 번 연결하는 건 이 체험에서는 지원하지 않아요.');
+      used.push(j.table);
+      const out = [];
+      for (const a of rows) for (const r of jt.rows){
+        const b = qualify(j.table, r);
+        const m = {...a, ...b, __src:{...a.__src, ...b.__src}};
+        if (evalE(j.on, m)) out.push(m);
+      }
+      rows = out;
+      colKeys = colKeys.concat(jt.columns.map(c => j.table+'.'+c.name));
+    }
+    const probe = {}; colKeys.forEach(k => probe[k]=null);
+    const check = e => { if (!e) return; if (e.k==='col') resolve(probe, e); ['l','r','e'].forEach(x => e[x] && check(e[x])); };
+    check(s.where); s.order.forEach(o => check(o.c)); s.items.forEach(it => { it.e && check(it.e); it.col && check(it.col); });
+    if (s.where) rows = rows.filter(r => evalE(s.where, r));
+    if (s.order.length){
+      rows.sort((x,y) => {
+        for (const o of s.order){
+          const a = resolve(x,o.c), b = resolve(y,o.c);
+          if (a==null && b==null) continue;
+          if (a==null) return 1; if (b==null) return -1;
+          const c = cmpVals(a,b); if (c) return o.desc ? -c : c;
+        }
+        return 0;
+      });
+    }
+    if (s.limit!==null) rows = rows.slice(0, s.limit);
+    if (s.items.some(i => i.k==='count')){
+      if (s.items.length>1) throw new SqlError('이 체험에서는 COUNT는 혼자만 쓸 수 있어요. 예: SELECT COUNT(*) FROM 직원');
+      const it = s.items[0];
+      const n = it.col ? rows.filter(r => resolve(r, it.col)!=null).length : rows.length;
+      return {kind:'select', columns:[it.as || '개수'], rows:[[n]], srcs:[{}], count:true, message:`조건에 맞는 줄은 모두 ${n}개예요.`};
+    }
+    const shortName = k => k.slice(k.indexOf('.')+1);
+    const dup = n => colKeys.filter(k => shortName(k)===n).length > 1;
+    const cols = [];
+    for (const it of s.items){
+      if (it.k==='star') colKeys.forEach(k => cols.push({label: dup(shortName(k)) ? k : shortName(k), get: r => r[k]}));
+      else cols.push({label: it.as || (it.e.table && dup(it.e.col) ? it.e.table+'.'+it.e.col : it.e.col), get: r => resolve(r, it.e)});
+    }
+    return {kind:'select', columns:cols.map(c=>c.label), rows:rows.map(r => cols.map(c => c.get(r))), srcs:rows.map(r=>r.__src),
+      message: rows.length ? `${rows.length}줄을 찾았어요.` : '조건에 맞는 줄이 하나도 없어요.'};
+  }
+  if (s.type==='insert'){
+    const t = getTable(s.table), pks = pkCols(t);
+    const cols = s.cols ? s.cols.map(n => { const c = t.columns.find(c=>c.name===n); if (!c) throw new SqlError(`'${s.table}' 표에는 '${n}' 열이 없어요.`); return c; }) : t.columns;
+    const newRows = [];
+    for (const vals of s.tuples){
+      if (vals.length !== cols.length) throw new SqlError(`열은 ${cols.length}개인데 값은 ${vals.length}개예요. 개수가 같아야 해요.`);
+      const r = {};
+      t.columns.forEach(c => r[c.name] = null);
+      cols.forEach((c,i) => r[c.name] = coerce(c, vals[i]));
+      t.columns.forEach(c => { if (!cols.includes(c)) coerce(c, null); });
+      newRows.push(r);
+    }
+    checkKeys(t, t.rows.concat(newRows), newRows);
+    newRows.forEach(r => r.__rid = ridSeq++);
+    t.rows.push(...newRows);
+    return {kind:'change', op:'insert', table:s.table, ids:newRows.map(r=>r.__rid), message:`${s.table} 표에 ${newRows.length}줄을 새로 입력했어요.`};
+  }
+  if (s.type==='update'){
+    const t = getTable(s.table);
+    const setCols = s.sets.map(st => {
+      const c = t.columns.find(c=>c.name===st.col);
+      if (!c) throw new SqlError(`'${s.table}' 표에는 '${st.col}' 열이 없어요.`);
+      return c;
+    });
+    const targets = t.rows.filter(r => !s.where || evalE(s.where, qualify(s.table, r)));
+    const clones = new Map();
+    for (const r of targets){
+      const n = {...r};
+      s.sets.forEach((st,j) => n[st.col] = coerce(setCols[j], evalE(st.e, qualify(s.table, r))));
+      for (const c of setCols){
+        if (cmpVals(r[c.name], n[c.name])===0) continue;
+        const refs = referrers(s.table, r).filter(f => db[f.table].columns.find(x=>x.name===f.col).ref.col===c.name);
+        if (refs.length) throw new SqlError(refMsg(s.table, r, refs, '바꿀'));
+      }
+      clones.set(r, n);
+    }
+    checkKeys(t, t.rows.map(r => clones.get(r) || r), [...clones.values()]);
+    targets.forEach(r => Object.assign(r, clones.get(r)));
+    return {kind:'change', op:'update', table:s.table, ids:targets.map(r=>r.__rid), noWhere:!s.where,
+      message: targets.length ? `${s.table} 표에서 ${targets.length}줄을 고쳤어요.` : '조건에 맞는 줄이 없어서 아무것도 바뀌지 않았어요.'};
+  }
+  if (s.type==='delete'){
+    const t = getTable(s.table);
+    const before = t.rows.length;
+    const gone = t.rows.filter(r => !s.where || evalE(s.where, qualify(s.table, r)));
+    for (const r of gone){ const refs = referrers(s.table, r, gone); if (refs.length) throw new SqlError(refMsg(s.table, r, refs, '지울')); }
+    t.rows = t.rows.filter(r => !gone.includes(r));
+    return {kind:'change', op:'delete', table:s.table, ids:[], removed:gone, noWhere:!s.where,
+      message: gone.length ? `${s.table} 표에서 ${gone.length}줄을 지웠어요. (${before}줄 → ${t.rows.length}줄)` : '조건에 맞는 줄이 없어서 아무것도 지워지지 않았어요.'};
+  }
+}
+
+/* =========================================================
+   2. 화면 그리기 도우미
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const cell = v => v==null ? '<td class="null">(비어 있음)</td>' : `<td>${esc(v)}</td>`;
+function sqlHTML(sql){
+  return esc(sql)
+    .replace(/(&#39;(?:[^&]|&(?!#39;))*?&#39;)/g, '<span class="s">$1</span>')
+    .replace(/\b(SELECT|FROM|WHERE|AND|OR|NOT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|ORDER|BY|ASC|DESC|LIMIT|JOIN|INNER|ON|LIKE|AS|NULL|IS|COUNT|CREATE|TABLE|PRIMARY|KEY|REFERENCES|INTEGER|TEXT)\b/g, '<span class="k">$1</span>');
+}
+let hl = {};
+let sqlOn = false;
+try { sqlOn = localStorage.getItem('db-exp-sql') === '1'; } catch(e){}
+
+const TABLE_TITLE = {한표명부:'📒 한표명부 <span style="color:var(--bad)">(모든 걸 한 표에)</span>', 부서:'📋 부서 표', 직원:'📋 직원 표', 프로젝트:'📋 프로젝트 표', 참여:'🔀 참여 표 <span class="muted">(직원 ↔ 프로젝트를 잇는 중간 표)</span>'};
+function badges(t, c){
+  const multi = pkCols(t).length > 1;
+  return (c.pk ? `<span class="bd pk">🔑 기본 키${multi ? ' (두 칸 묶음)' : ''}</span>` : '')
+    + (c.ref ? `<span class="bd fk">🔗 → ${c.ref.table}.${c.ref.col}</span>` : '');
+}
+function renderDB(){
+  let h = '';
+  for (const name of (STEPS[cur].tables || ['직원','부서'])){
+    const t = db[name], m = hl[name] || new Map();
+    h += `<div class="tbl"><div class="tblName">${TABLE_TITLE[name]} <small>${t.rows.length}줄</small></div><div class="scroll"><table data-t="${name}"><thead><tr>`;
+    for (const c of t.columns) h += `<th>${esc(c.name)}<span class="ty">${c.type==='num'?'숫자':'글자'}</span>${badges(t,c)}</th>`;
+    h += '</tr></thead><tbody>';
+    if (!t.rows.length) h += `<tr><td colspan="${t.columns.length}" class="null">비어 있는 표예요</td></tr>`;
+    for (const r of t.rows){
+      h += `<tr data-id="${r.__rid}" class="${m.get(r.__rid) || ''}">`;
+      for (const c of t.columns) h += `<td class="${r[c.name]==null?'null':''}" data-c="${esc(c.name)}">${r[c.name]==null ? '(비어 있음)' : esc(r[c.name])}</td>`;
+      h += '</tr>';
+    }
+    h += '</tbody></table></div></div>';
+  }
+  $('#dbView').innerHTML = h;
+}
+function setHighlight(table, ids, cls){
+  hl = {};
+  if (table){ hl[table] = new Map(); ids.forEach(id => hl[table].set(id, cls)); }
+  renderDB();
+}
+function highlightMany(map){   // {표이름: 조건함수}
+  hl = {};
+  for (const [t, pred] of Object.entries(map)){ hl[t] = new Map(); db[t].rows.filter(pred).forEach(r => hl[t].set(r.__rid, 'hl')); }
+  renderDB();
+}
+function highlightSrcs(srcs){
+  hl = {};
+  srcs.forEach(s => Object.entries(s).forEach(([t,id]) => { (hl[t] ||= new Map()).set(id, 'hl'); }));
+  renderDB();
+}
+function resultTable(res){
+  let h = `<div class="scroll"><table><thead><tr>${res.columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+  res.rows.forEach((r,i) => h += `<tr data-i="${i}">${r.map(cell).join('')}</tr>`);
+  if (!res.rows.length) h += `<tr><td colspan="${res.columns.length}" class="null">결과 없음</td></tr>`;
+  return h + '</tbody></table></div>';
+}
+function run(sql, out, opts={}){
+  let res;
+  try { res = execute(sql); }
+  catch (e){
+    if (!(e instanceof SqlError)) console.error(e);
+    out.innerHTML = `<div class="msg err">🚫 ${esc(e.message)}</div>`;
+    log(sql, false);
+    opts.after && opts.after(null, e);
+    return null;
+  }
+  log(sql, true);
+  if (res.kind==='select'){
+    out.innerHTML = `<div class="result"><div class="msg info">🔎 ${esc(res.message)}</div>${res.rows.length || res.count ? resultTable(res) : ''}</div>`;
+    if (!res.count) highlightSrcs(res.srcs); else { hl = {}; renderDB(); }
+    out.querySelectorAll('tr[data-i]').forEach(tr => {
+      tr.addEventListener('mouseenter', () => highlightSrcs([res.srcs[+tr.dataset.i]]));
+      tr.addEventListener('mouseleave', () => highlightSrcs(res.srcs));
+    });
+  } else {
+    let extra = '';
+    if (res.noWhere && (res.ids.length || (res.removed||[]).length))
+      extra = `<div class="msg warn">😱 ${sqlOn ? 'WHERE(조건) 없이' : '어느 줄인지 정하지 않고'} 실행해서 <b>표의 모든 줄</b>이 ${res.op==='update'?'바뀌었어요':'지워졌어요'}! 오른쪽 위 '처음 상태로 되돌리기'를 눌러 보세요.</div>`;
+    out.innerHTML = `<div class="msg ok">✅ ${esc(res.message)}</div>${extra}`;
+    setHighlight(res.table, res.ids, 'flash');
+  }
+  opts.after && opts.after(res);
+  return res;
+}
+const execLog = [];
+function log(sql, ok){
+  execLog.unshift({sql, ok});
+  if (execLog.length>30) execLog.pop();
+  const el = $('#history'); if (el) el.innerHTML = renderHistory();
+}
+function renderHistory(){
+  if (!execLog.length) return '<div>아직 실행한 문장이 없어요.</div>';
+  return execLog.map(h => `<div class="${h.ok?'':'x'}">${h.ok?'✔':'✖'} ${esc(h.sql)}</div>`).join('');
+}
+/* 실험 카드: 결과 아래에 덧붙일 설명(after), 실행 뒤 이어서 보여줄 문장(then) */
+function expCards(list, px='exp'){
+  return list.map((x,i) => `<div class="exp" id="${px}${i}"><b class="t">${x.title}</b>
+    <div class="sql"></div>
+    <button class="btn small ${x.color||''}">해 보기</button><div class="out"></div></div>`).join('');
+}
+function initExp(list, px='exp'){
+  list.forEach((x,i) => {
+    const box = $('#'+px+i);
+    box.querySelector('.sql').innerHTML = sqlHTML(x.sql);
+    box.querySelector('button').onclick = () => {
+      const out = box.querySelector('.out');
+      const res = run(x.sql, out, {after: (r, err) => { if (x.after){ const m = x.after(r, err); if (m) out.insertAdjacentHTML('beforeend', m); } }});
+      if (res && x.then){
+        const more = document.createElement('div'); out.appendChild(more);
+        more.insertAdjacentHTML('beforeend', `<div class="sqlLabel">이어서 확인</div><div class="sql">${sqlHTML(x.then)}</div>`);
+        const box2 = document.createElement('div'); more.appendChild(box2);
+        run(x.then, box2, {after: r => { if (x.thenAfter){ const m = x.thenAfter(r); if (m) box2.insertAdjacentHTML('beforeend', m); } }});
+      }
+    };
+  });
+}
+
+/* =========================================================
+   3. 단계별 수업
+   ========================================================= */
+const ONE_EXP = [
+  {title:'① 개발팀이 7층으로 이사 — 김민준 줄만 고치기', color:'orange',
+   sql:"UPDATE 한표명부\nSET 부서위치 = '7층'\nWHERE 사번 = 1001",
+   after:r => r ? '<div class="msg warn">😱 개발팀이 <b>5층에도 있고 7층에도</b> 있는 이상한 상태가 됐어요! 개발팀 직원이 3명이라 3줄을 모두 고쳐야 했거든요. 직원이 1,000명이면 1,000줄을 고쳐야 하고, 하나라도 빠뜨리면 이렇게 돼요.</div>' : ''},
+  {title:'② 신입 한예린을 입력하면서 부서 이름을 "개발 팀"으로 잘못 쓰기', color:'green',
+   sql:"INSERT INTO 한표명부 (사번, 이름, 직급, 부서이름, 부서위치)\nVALUES (1007, '한예린', '사원', '개발 팀', '5층')",
+   then:"SELECT COUNT(*) FROM 한표명부\nWHERE 부서이름 = '개발팀'",
+   thenAfter:r => r ? '<div class="msg warn">😱 개발팀 직원을 셌더니 한예린이 빠졌어요! 같은 부서 이름을 줄마다 다시 쓰다 보니 띄어쓰기 하나로 다른 부서가 되어 버렸어요.</div>' : ''},
+  {title:'③ 디자인팀의 하나뿐인 직원 최지우가 퇴사하기', color:'red',
+   sql:"DELETE FROM 한표명부\nWHERE 사번 = 1004",
+   after:r => r && r.removed.length ? '<div class="msg warn">😱 최지우의 줄을 지웠더니 <b>"디자인팀은 4층에 있다"</b>는 정보까지 함께 사라졌어요! 부서 정보가 직원 줄 안에 같이 들어 있었기 때문이에요.</div>' : ''},
+];
+const SPLIT_EXP = [
+  {title:'① 개발팀이 7층으로 이사 — 부서 표 한 줄만 고치기', color:'orange',
+   sql:"UPDATE 부서\nSET 위치 = '7층'\nWHERE 이름 = '개발팀'",
+   then:"SELECT 직원.이름 AS 직원, 부서.이름 AS 부서, 부서.위치\nFROM 직원 JOIN 부서\nON 직원.부서명 = 부서.이름\nWHERE 부서.이름 = '개발팀'",
+   thenAfter:r => r ? '<div class="msg ok">👍 딱 한 줄만 고쳤는데, 개발팀 직원 모두가 7층으로 보여요. 부서 위치는 부서 표 <b>한 곳에만</b> 적혀 있으니까요.</div>' : ''},
+  {title:'② 신입 한예린을 입력하면서 부서명을 "개발 팀"으로 잘못 쓰기', color:'green',
+   sql:"INSERT INTO 직원 (사번, 이름, 직급, 부서명)\nVALUES (1007, '한예린', '사원', '개발 팀')",
+   after:(r, e) => e ? '<div class="msg ok">👍 이번엔 막아 줬어요! 직원 표의 부서명은 부서 표와 연결되어 있어서, 부서 표에 <b>실제로 있는 부서명</b>만 쓸 수 있거든요.</div>' : ''},
+  {title:'③ 이번엔 부서명을 바르게 "개발팀"으로 써서 입력하기', color:'green',
+   sql:"INSERT INTO 직원 (사번, 이름, 직급, 부서명)\nVALUES (1007, '한예린', '사원', '개발팀')"},
+  {title:'④ 디자인팀의 하나뿐인 직원 최지우가 퇴사하기', color:'red',
+   sql:"DELETE FROM 직원\nWHERE 사번 = 1004",
+   after:r => r && r.removed.length ? '<div class="msg ok">👍 최지우는 사라졌지만, 부서 표의 <b>디자인팀(4층)</b>은 그대로 남아 있어요. 직원이 한 명도 없는 <b>인사팀</b>도 부서 표에 멀쩡히 있죠? 한표명부였다면 적을 곳조차 없었을 거예요.</div>' : ''},
+];
+const ID_BEFORE_EXP = [
+  {title:'① 회사가 개발팀 이름을 "개발본부"로 바꾸기로 했어요', color:'orange',
+   sql:"UPDATE 부서\nSET 이름 = '개발본부'\nWHERE 이름 = '개발팀'",
+   after:(r, e) => e ? '<div class="msg warn">😵 이름을 바꾸지 못했어요! 부서 이름이 곧 <b>키</b>라서, 직원 표에 적힌 "개발팀"들과 연결되어 있거든요. 바꾸려면 연결된 직원 줄을 <b>전부</b> 함께 고쳐야 해요. 직원이 1,000명이고 개발팀 이름을 쓰는 표가 열 개라면…?</div>' : ''},
+  {title:'② 부산 지사에도 "영업팀"을 새로 만들기', color:'green',
+   sql:"INSERT INTO 부서 (이름, 위치)\nVALUES ('영업팀', '부산 2층')",
+   after:(r, e) => e ? '<div class="msg warn">😵 만들지 못했어요! 이름이 키라서 <b>같은 이름의 부서가 둘</b> 있을 수 없어요. 서울 영업팀과 부산 영업팀은 엄연히 다른 부서인데도요.</div>' : ''},
+];
+const ID_AFTER_EXP = [
+  {title:'③ 다시 해 보기: 개발팀 이름을 "개발본부"로 바꾸기', color:'orange',
+   sql:"UPDATE 부서\nSET 이름 = '개발본부'\nWHERE 번호 = 1",
+   then:"SELECT 직원.이름 AS 직원, 부서.번호, 부서.이름 AS 부서\nFROM 직원 JOIN 부서\nON 직원.부서번호 = 부서.번호\nWHERE 부서.번호 = 1",
+   thenAfter:r => r ? '<div class="msg ok">👍 이번엔 바로 바뀌었어요! 직원 표에는 이름이 아니라 <b>번호 1</b>이 적혀 있으니, 직원 줄은 하나도 고칠 필요가 없어요. 이름이 바뀌어도 번호는 그대로예요.</div>' : ''},
+  {title:'④ 다시 해 보기: 부산 지사에도 "영업팀" 만들기', color:'green',
+   sql:"INSERT INTO 부서 (번호, 이름, 위치)\nVALUES (5, '영업팀', '부산 2층')",
+   after:r => r ? '<div class="msg ok">👍 이름이 같아도 번호(2와 5)가 달라서 두 영업팀을 구분할 수 있어요.</div>' : ''},
+];
+const JOIN_SQL = "SELECT 직원.이름 AS 직원, 직원.직급, 부서.이름 AS 부서, 부서.위치\nFROM 직원 JOIN 부서\nON 직원.부서번호 = 부서.번호";
+const JOIN_EXP = [
+  {title:'① 직원과 부서를 이어서 보기', sql:JOIN_SQL},
+  {title:'② 개발팀 직원만 이어서 보기', sql:JOIN_SQL + "\nWHERE 부서.이름 = '개발팀'"},
+  {title:'③ 영업팀이 있는 층에서 일하는 사람 세기', sql:"SELECT COUNT(*)\nFROM 직원 JOIN 부서\nON 직원.부서번호 = 부서.번호\nWHERE 부서.이름 = '영업팀'"},
+];
+const NM_EXP = [
+  {title:'① AI 챗봇 프로젝트에 참여한 직원 보기', sql:"SELECT 직원.이름, 참여.역할\nFROM 참여 JOIN 직원\nON 참여.사번 = 직원.사번\nWHERE 참여.프로젝트번호 = 1"},
+  {title:'② 박도윤이 참여한 프로젝트 보기', sql:"SELECT 프로젝트.이름 AS 프로젝트, 참여.역할\nFROM 참여 JOIN 프로젝트\nON 참여.프로젝트번호 = 프로젝트.번호\nWHERE 참여.사번 = 1003"},
+  {title:'③ 세 표를 한꺼번에 이어서 누가 어떤 프로젝트를 하는지 보기',
+   sql:"SELECT 직원.이름 AS 직원, 프로젝트.이름 AS 프로젝트, 참여.역할\nFROM 참여\nJOIN 직원 ON 참여.사번 = 직원.사번\nJOIN 프로젝트 ON 참여.프로젝트번호 = 프로젝트.번호\nORDER BY 직원.이름"},
+  {title:'④ 이서연을 AI 챗봇 프로젝트에 추가하기', color:'green', sql:"INSERT INTO 참여 (사번, 프로젝트번호, 역할)\nVALUES (1002, 1, '영업')",
+   after:r => r ? '<div class="msg ok">👍 중간 표에 한 줄만 넣으면 새로운 연결이 생겨요. 이제 이서연은 프로젝트 2개에 참여해요.</div>' : ''},
+  {title:'⑤ 같은 연결(이서연 ↔ AI 챗봇)을 한 번 더 추가하기', color:'green', sql:"INSERT INTO 참여 (사번, 프로젝트번호, 역할)\nVALUES (1002, 1, '영업')"},
+];
+const REL_QUIZ = [
+  {q:'부서 ↔ 직원', ans:'1n', why:'한 부서에는 여러 직원이 있지만, 직원 한 명은 한 부서에만 속해요.'},
+  {q:'직원 ↔ 사원증', ans:'11', why:'직원 한 명에게 사원증은 딱 한 장, 사원증 한 장의 주인도 딱 한 명이에요.'},
+  {q:'직원 ↔ 프로젝트', ans:'nm', why:'한 직원이 여러 프로젝트에 참여하고, 한 프로젝트에도 여러 직원이 있어요. 그래서 참여 표가 필요해요.'},
+  {q:'고객 ↔ 주문 (쇼핑몰)', ans:'1n', why:'고객 한 명은 여러 번 주문하지만, 주문 하나는 한 고객의 것이에요.'},
+  {q:'학생 ↔ 수업', ans:'nm', why:'학생은 여러 수업을 듣고, 수업 하나도 여러 학생이 들어요.'},
+];
+const REL_ANS = {'11':'1 : 1', '1n':'1 : 다', 'nm':'다 : 다'};
+const FK_EXP = [
+  {title:'① 없는 부서(9번)에 신입 넣기', color:'green', sql:"INSERT INTO 직원 (사번, 이름, 직급, 부서번호)\nVALUES (1008, '서지안', '사원', 9)"},
+  {title:'② 직원이 있는 개발팀 지우기', color:'red', sql:"DELETE FROM 부서\nWHERE 번호 = 1"},
+  {title:'③ 없는 프로젝트(9번)에 참여시키기', color:'green', sql:"INSERT INTO 참여 (사번, 프로젝트번호, 역할)\nVALUES (1001, 9, '개발')"},
+  {title:'④ 프로젝트에 참여 중인 윤시우 지우기', color:'red', sql:"DELETE FROM 직원\nWHERE 사번 = 1006"},
+  {title:'⑤ 직원이 없는 인사팀 지우기', color:'red', sql:"DELETE FROM 부서\nWHERE 번호 = 4",
+   after:r => r ? '<div class="msg ok">👍 인사팀은 아무 줄과도 연결되어 있지 않아서 지울 수 있었어요.</div>' : ''},
+];
+const NAME_KEY_SQL = "-- 부서 이름을 키로 쓸 때\nCREATE TABLE 부서 (\n  이름 TEXT PRIMARY KEY,\n  위치 TEXT\n)\n\nCREATE TABLE 직원 (\n  사번   INTEGER PRIMARY KEY,\n  이름   TEXT,\n  직급   TEXT,\n  부서명 TEXT REFERENCES 부서(이름)\n)";
+const CREATE_SQL = "CREATE TABLE 부서 (\n  번호 INTEGER PRIMARY KEY,\n  이름 TEXT,\n  위치 TEXT\n)\n\nCREATE TABLE 직원 (\n  사번     INTEGER PRIMARY KEY,\n  이름     TEXT,\n  직급     TEXT,\n  부서번호 INTEGER REFERENCES 부서(번호)\n)";
+const EXAMPLES = [
+  "SELECT * FROM 부서",
+  "SELECT * FROM 직원 WHERE 부서번호 = 2",
+  JOIN_SQL.replace(/\n/g,' '),
+  "SELECT 직원.이름, 부서.위치 FROM 직원 JOIN 부서 ON 직원.부서번호 = 부서.번호 WHERE 부서.위치 = '5층'",
+  "SELECT 직원.이름 AS 직원, 프로젝트.이름 AS 프로젝트 FROM 참여 JOIN 직원 ON 참여.사번 = 직원.사번 JOIN 프로젝트 ON 참여.프로젝트번호 = 프로젝트.번호",
+  "SELECT COUNT(*) FROM 참여 WHERE 프로젝트번호 = 1",
+  "INSERT INTO 프로젝트 (번호, 이름, 마감) VALUES (4, '사내 교육', '2027-02')",
+  "INSERT INTO 참여 (사번, 프로젝트번호, 역할) VALUES (1005, 4, '강사')",
+  "UPDATE 직원 SET 부서번호 = 4 WHERE 사번 = 1005",
+  "DELETE FROM 프로젝트 WHERE 번호 = 3",
+  "SELECT * FROM 한표명부 WHERE 부서이름 = '개발팀'",
+];
+
+const STEPS = [
+  { name:'관계형 데이터베이스란?', schema:'name', render(){ return `
+    <h2>🧩 관계형 데이터베이스가 뭐예요?</h2>
+    <p>정보를 주제별로 <b>여러 개의 표</b>에 나눠 담고, 그 표들을 <b>서로 이어(관계) 놓은</b> 데이터베이스를
+    <span class="term">관계형 데이터베이스</span>라고 해요. 영어로는 Relational DataBase, 줄여서 <b>RDB</b>예요.</p>
+    <p>오른쪽을 보세요. 직원 정보는 <b>직원 표</b>에, 부서 정보는 <b>부서 표</b>에 따로 있어요.
+    그리고 직원 표의 <b>부서명</b>이 부서 표와 이어 주고 있어요.</p>
+    <div class="split"><span class="tag">직원 표<br><small>누가 일하나?</small></span><span class="arrow">🔗</span><span class="tag">부서 표<br><small>어떤 부서가 어디 있나?</small></span></div>
+    <h3>우리가 쓰는 서비스도 대부분 관계형 데이터베이스예요</h3>
+    <div class="grid3">
+      <div class="mini"><b>🛒 쇼핑몰</b><small>회원 표 · 상품 표 · 주문 표<br>"누가 무엇을 샀나"를 이어요</small></div>
+      <div class="mini"><b>🏦 은행</b><small>고객 표 · 계좌 표 · 거래 표<br>"누구의 계좌에서 돈이 나갔나"</small></div>
+      <div class="mini"><b>📚 도서관</b><small>회원 표 · 책 표 · 대출 표<br>"누가 어떤 책을 빌렸나"</small></div>
+    </div>
+    <h3>그런데 왜 굳이 표를 나눌까요?</h3>
+    <p>그냥 커다란 표 하나에 다 적으면 편할 것 같죠? 다음 단계에서 직접 해 보면 왜 나누는지 알 수 있어요.</p>
+    <p class="muted">무엇을 망가뜨려도 괜찮아요. 언제든 '처음 상태로 되돌리기'를 누르면 돼요.</p>`; },
+    init(){ highlightMany({직원: r => r.부서명==='개발팀', 부서: r => r.이름==='개발팀'}); } },
+
+  { name:'한 표에 다 담으면?', tables:['한표명부'], render(){ return `
+    <h2>😵 한 표에 다 담으면 생기는 일</h2>
+    <p>오른쪽 <b>한표명부</b>는 직원 정보와 부서 정보를 한 표에 모두 적었어요.
+    <b>"개발팀, 5층"</b>이 세 번이나 반복되는 게 보이죠? 아래 실험을 차례대로 해 보세요.</p>
+    ${expCards(ONE_EXP)}
+    <div class="tip">💡 하나 더! 새로 생긴 <b>인사팀(2층)</b>은 아직 직원이 없어요. 한표명부에는 직원 줄이 있어야 부서를 적을 수 있으니, 인사팀은 <b>적을 곳이 없어요</b>.</div>
+    <h3>정리하면</h3>
+    <ul>
+      <li>같은 내용이 여러 번 적혀서 <b>고칠 때 빠뜨리기 쉬워요</b>.</li>
+      <li>같은 걸 매번 다시 쓰다 보니 <b>오타가 생겨요</b>.</li>
+      <li>하나를 지우면 <b>엉뚱한 정보까지 사라져요</b>.</li>
+      <li>짝이 없으면 <b>적을 곳조차 없어요</b>.</li>
+    </ul>`; },
+    init(){ initExp(ONE_EXP); } },
+
+  { name:'표를 나누자', schema:'name', tables:['직원','부서'], render(){ return `
+    <h2>✂️ 주제별로 표를 나누면</h2>
+    <p>한표명부를 <b>직원에 대한 것</b>과 <b>부서에 대한 것</b>으로 나눴어요. 오른쪽을 보세요.</p>
+    <div class="split">
+      <span class="tag">한표명부<br><small>사번·이름·직급·부서이름·부서위치</small></span><span class="arrow">➜</span>
+      <span class="tag">직원 표<br><small>사번·이름·직급·<b>부서명</b></small></span><span class="arrow">+</span>
+      <span class="tag">부서 표<br><small><b>이름</b>·위치</small></span>
+    </div>
+    <p>부서의 위치는 이제 <b>부서 표에 딱 한 번씩만</b> 적혀 있어요. 직원 표에는 어느 부서인지 <b>부서명</b>만 적어요.</p>
+    <p>두 표는 부서 이름으로 이어져요. 부서 표에서는 부서 이름이 겹치지 않으니 부서를 가리키는 <span class="term">키</span>로 쓸 수 있어요(🔑).
+    직원 표의 부서명은 그 키를 가리키는 칸이에요(🔗). 아까와 비슷한 실험을 해 볼게요.</p>
+    ${expCards(SPLIT_EXP)}
+    <div class="tip">💡 이렇게 "한 가지 정보는 한 곳에만" 적히도록 표를 알맞게 나누는 걸 <span class="term">정규화</span>라고 해요.</div>
+    <p class="muted">그런데 부서 <b>이름</b>을 키로 쓰는 게 정말 좋은 방법일까요? 다음 단계에서 확인해 봐요.</p>`; },
+    init(){ initExp(SPLIT_EXP); } },
+
+  { name:'숫자 ID 붙이기', schema:'name', tables:['직원','부서'], render(){ return `
+    <h2>🔢 왜 이름 대신 숫자 ID를 쓸까요?</h2>
+    <p>지금은 <b>부서 이름</b>이 키예요. 잘 돌아가는 것 같지만, 회사에서는 이런 일이 자주 생겨요.</p>
+    ${expCards(ID_BEFORE_EXP, 'idb')}
+    <h3>해결책: 의미 없는 숫자를 하나 붙이자</h3>
+    <p>부서마다 <b>1, 2, 3…</b> 처럼 겹치지 않는 번호(ID)를 붙여서 그걸 키로 쓰고, 직원 표에는 부서 이름 대신 그 <b>번호</b>를 적는 거예요.</p>
+    <div id="convBox">
+      <button class="btn" id="convBtn">🔢 부서에 숫자 ID 붙이기</button>
+    </div>
+    <div id="afterBox" style="display:none">
+      <div class="msg ok">✅ 부서마다 번호를 붙이고, 직원 표의 <b>부서명</b> 칸을 <b>부서번호</b> 칸으로 바꿨어요. 오른쪽 표를 보세요.</div>
+      <div class="split">
+        <span class="tag">직원 표<br><small>사번·이름·직급·<b>부서번호</b></small></span><span class="arrow">🔗</span>
+        <span class="tag">부서 표<br><small><b>번호</b>·이름·위치</small></span>
+      </div>
+      ${expCards(ID_AFTER_EXP, 'ida')}
+    </div>
+    <h3>이름 키 vs 숫자 ID</h3>
+    <div class="scroll"><table class="compare">
+      <thead><tr><th></th><th>부서 이름 (글자)</th><th>숫자 ID</th></tr></thead>
+      <tbody>
+        <tr><td>이름이 바뀌면?</td><td>연결된 줄을 <b>모두</b> 고쳐야 해요</td><td>부서 표 <b>한 줄</b>만 고치면 돼요</td></tr>
+        <tr><td>같은 이름이 생기면?</td><td>❌ 둘 수 없어요</td><td>⭕ 번호가 달라서 괜찮아요</td></tr>
+        <tr><td>길이</td><td>'해외마케팅전략기획팀' 처럼 길 수 있어요</td><td>1, 2, 3 … 짧아요</td></tr>
+        <tr><td>찾고 비교하는 속도</td><td>글자를 하나하나 비교해요</td><td>숫자 한 번 비교로 끝나요</td></tr>
+        <tr><td>오타</td><td>띄어쓰기, 비슷한 글자로 헷갈려요</td><td>헷갈릴 일이 적어요</td></tr>
+      </tbody></table></div>
+    <div class="gloss">
+      <b>자연 키</b><span>원래부터 의미가 있는 값을 키로 쓰는 것 (부서 이름, 이메일)</span>
+      <b>대리 키</b><span>구분만을 위해 일부러 붙인 의미 없는 번호 (부서 번호). 바뀔 일이 없어서 키로 쓰기 좋아요</span>
+    </div>
+    <div class="tip">💡 사실 <b>사번</b>도 회사가 직원을 구분하려고 일부러 붙인 숫자 ID예요. 그래서 대부분의 관계형 데이터베이스는 표마다 숫자 ID를 기본 키로 두고, 이름 같은 의미 있는 값은 그냥 일반 칸으로 둬요.</div>
+    <div class="sqlLabel">SQL로 표를 만들 때 비교해 보면</div>
+    <div class="sql">${sqlHTML(NAME_KEY_SQL + "\n\n-- 숫자 ID로 바꾼 뒤\n" + CREATE_SQL)}</div>`; },
+    init(){
+      initExp(ID_BEFORE_EXP, 'idb');
+      $('#convBtn').onclick = () => {
+        toIdSchema();
+        $('#convBox').style.display = 'none';
+        $('#afterBox').style.display = '';
+        initExp(ID_AFTER_EXP, 'ida');
+        hl = {}; hl.부서 = new Map(db.부서.rows.map(r => [r.__rid, 'flash'])); hl.직원 = new Map(db.직원.rows.map(r => [r.__rid, 'flash']));
+        renderDB();
+      };
+    } },
+
+  { name:'관계 따라가기', schema:'id', tables:['직원','부서'], render(){ return `
+    <h2>🔗 표와 표를 잇는 관계</h2>
+    <p>나눈 표는 <b>키</b>로 이어져 있어요.</p>
+    <ul>
+      <li>부서 표의 <b>번호</b> — 부서마다 겹치지 않는 값이에요. <span class="term">기본 키</span>라고 해요.</li>
+      <li>직원 표의 <b>부서번호</b> — 부서 표의 기본 키를 가리켜요. 다른 표의 키를 가리키는 칸을 <span class="term">외래 키</span>라고 해요.</li>
+    </ul>
+    <div class="linkbox"><span class="tag">직원 표 · 부서번호 = 1</span><span class="arrow">──▶</span><span class="tag">부서 표 · 번호 1 = 개발팀</span></div>
+    <div class="msg info" id="relInfo">👉 오른쪽 표에서 <b>직원이나 부서를 아무거나 눌러 보세요.</b> 연결된 줄이 함께 표시돼요.</div>
+    <h3>한 부서 ↔ 여러 직원</h3>
+    <p>부서 하나를 누르면 여러 직원이 표시되고, 직원 하나를 누르면 부서는 딱 하나만 표시되죠?
+    이런 관계를 <span class="term">1 : 다 관계</span>라고 해요. 관계형 데이터베이스에서 가장 흔한 관계예요.</p>`; },
+    onCell(info){
+      if (info.table==='직원'){
+        const r = db.직원.rows.find(x => x.__rid===info.id), d = db.부서.rows.find(x => x.번호===r.부서번호);
+        highlightMany({직원: x => x===r, 부서: x => x===d});
+        $('#relInfo').innerHTML = d ? `👤 <b>${esc(r.이름)}</b>의 부서번호는 <b>${r.부서번호}</b> → 부서 표에서 ${josa('번호 '+r.부서번호,'을','를')} 찾아가면 <b>${esc(d.이름)} (${esc(d.위치)})</b>이에요. 직원 한 명은 부서 <b>하나</b>와 이어져요.`
+          : `👤 <b>${esc(r.이름)}</b>${josa(r.이름,'은','는').slice(r.이름.length)} 부서번호가 비어 있어서 연결된 부서가 없어요.`;
+      } else if (info.table==='부서'){
+        const d = db.부서.rows.find(x => x.__rid===info.id), ms = db.직원.rows.filter(x => x.부서번호===d.번호);
+        highlightMany({부서: x => x===d, 직원: x => x.부서번호===d.번호});
+        $('#relInfo').innerHTML = ms.length ? `🏢 <b>${esc(d.이름)}</b>(번호 ${d.번호})${josa(d.번호,'을','를').slice(String(d.번호).length)} 가리키는 직원은 <b>${ms.length}명</b>이에요: ${ms.map(m=>esc(m.이름)).join(', ')}. 부서 하나는 직원 <b>여러 명</b>과 이어질 수 있어요.`
+          : `🏢 <b>${esc(d.이름)}</b>${josa(d.이름,'을','를').slice(d.이름.length)} 가리키는 직원은 아직 없어요. 관계형 데이터베이스에서는 직원이 없어도 부서는 따로 있을 수 있어요.`;
+      }
+    } },
+
+  { name:'이어서 보기', schema:'id', tables:['직원','부서'], render(){ return `
+    <h2>🧷 나눈 표를 다시 이어서 보기</h2>
+    <p>표를 나눴으니 "김민준은 몇 층에서 일하지?" 같은 질문에 답하려면 두 표를 <b>이어서</b> 봐야 해요.
+    데이터베이스는 키를 따라가서 두 표를 순식간에 이어 붙여 줘요.</p>
+    ${expCards(JOIN_EXP)}
+    <div class="tip">💡 결과 줄에 마우스를 올려 보세요. 오른쪽에서 <b>어느 직원 줄과 어느 부서 줄이 합쳐졌는지</b> 표시돼요.<br>
+    💡 직원이 없는 인사팀은 짝이 없어서 결과에 나오지 않아요.</div>
+    <p class="muted sql-only">두 표를 잇는 걸 SQL로 <b>JOIN</b>이라고 해요. <b>ON</b> 뒤에 어떤 칸끼리 이을지 적어요.</p>`; },
+    init(){ initExp(JOIN_EXP); } },
+
+  { name:'관계의 종류', schema:'id', tables:['직원','프로젝트','참여'], render(){ return `
+    <h2>🔀 관계의 세 가지 종류</h2>
+    <div class="rel">
+      <div class="mini"><b>1 : 1</b><small>하나는 딱 하나와만</small><span class="ex">직원 ↔ 사원증</span></div>
+      <div class="mini"><b>1 : 다</b><small>하나가 여러 개와</small><span class="ex">부서 ↔ 직원</span></div>
+      <div class="mini"><b>다 : 다</b><small>여럿이 여럿과</small><span class="ex">직원 ↔ 프로젝트</span></div>
+    </div>
+    <h3>다 : 다 관계는 중간 표로 이어요</h3>
+    <p>한 직원이 여러 프로젝트를 하고, 한 프로젝트에도 여러 직원이 있어요. 이건 칸 하나로는 이을 수 없어요.
+    그래서 <b>"누가 어떤 프로젝트에 참여하나"</b>만 적는 <span class="term">중간 표</span>(오른쪽의 참여 표)를 만들어요.
+    참여 표의 한 줄 = 연결 하나예요.</p>
+    ${expCards(NM_EXP)}
+    <div class="tip">💡 참여 표의 기본 키는 <b>사번과 프로젝트번호를 묶은 것</b>이에요. 그래서 같은 직원을 같은 프로젝트에 두 번 넣을 수는 없어요.</div>
+    <h3>문제! 어떤 관계일까요?</h3>
+    ${REL_QUIZ.map((q,i) => `<div class="quiz" id="rq${i}"><div class="q">${q.q}</div>
+      <div class="row">${Object.entries(REL_ANS).map(([k,v]) => `<button class="btn ghost small" data-a="${k}">${v}</button>`).join('')}</div><div class="out"></div></div>`).join('')}`; },
+    init(){
+      initExp(NM_EXP);
+      REL_QUIZ.forEach((q,i) => document.querySelectorAll(`#rq${i} button`).forEach(b => b.onclick = () => {
+        const ok = b.dataset.a===q.ans;
+        $(`#rq${i} .out`).innerHTML = `<div class="msg ${ok?'ok':'err'}">${ok?'정답!':`아쉬워요. 정답은 <b>${REL_ANS[q.ans]}</b>`} — ${q.why}</div>`;
+      }));
+    } },
+
+  { name:'관계가 지켜 주는 것', schema:'id', tables:['부서','직원','프로젝트','참여'], render(){ return `
+    <h2>🛡️ 관계가 끊어지지 않게 지켜 줘요</h2>
+    <p>관계형 데이터베이스는 표 사이의 연결이 <b>엉뚱하게 끊어지거나 없는 곳을 가리키지 않도록</b> 지켜 줘요.
+    이걸 어려운 말로 <span class="term">참조 무결성</span>이라고 해요. 아래 실험으로 확인해 보세요.</p>
+    ${expCards(FK_EXP)}
+    <div class="tip">💡 엑셀 같은 표 프로그램은 이런 걸 막아 주지 않아요. 관계형 데이터베이스가 믿음직한 가장 큰 이유 중 하나예요.</div>`; },
+    init(){ initExp(FK_EXP); } },
+
+  { name:'직접 SQL 써 보기', schema:'id', sqlOnly:true, tables:['부서','직원','프로젝트','참여'], render(){ return `
+    <h2>⌨️ 여러 표를 직접 다뤄 보세요</h2>
+    <p>아래에 SQL을 적고 <b>실행</b>을 누르세요. (Ctrl + Enter 도 돼요) 예시를 누르면 바로 실행돼요.</p>
+    <textarea id="free">${esc(JOIN_SQL)}</textarea>
+    <div class="row"><button class="btn" id="freeBtn">실행</button><button class="btn ghost small" id="clearBtn">지우기</button></div>
+    <div id="freeOut"></div>
+    <h3>예시</h3>
+    <div class="examples">${EXAMPLES.map(e=>`<button>${esc(e)}</button>`).join('')}</div>
+    <h3>짧은 사전</h3>
+    <div class="cheat">
+      <code>FROM 표1 JOIN 표2 ON 표1.칸 = 표2.칸</code><span>두 표를 이어서 보기</span>
+      <code>JOIN 표3 ON …</code><span>JOIN을 이어 쓰면 세 표 이상도 이을 수 있어요</span>
+      <code>표.칸</code><span>어느 표의 칸인지 밝혀 쓰기 (이름이 겹칠 때)</span>
+      <code>AS 별명</code><span>결과에 보일 칸 이름 바꾸기</span>
+      <code>PRIMARY KEY</code><span>기본 키</span>
+      <code>REFERENCES 표(칸)</code><span>외래 키 — 다른 표와 잇기</span>
+    </div>
+    <div class="sqlLabel">표를 만들 때 관계는 이렇게 정해 둬요</div>
+    <div class="sql">${sqlHTML(CREATE_SQL)}</div>
+    <h3>실행 기록</h3>
+    <div class="history" id="history">${renderHistory()}</div>`; },
+    init(){
+      const go1 = () => run($('#free').value, $('#freeOut'));
+      $('#freeBtn').onclick = go1;
+      $('#clearBtn').onclick = () => { $('#free').value=''; $('#free').focus(); };
+      $('#free').onkeydown = e => { if (e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); go1(); } };
+      document.querySelectorAll('.examples button').forEach(b => b.onclick = () => { $('#free').value = b.textContent; go1(); });
+    } },
+
+  { name:'정리', schema:'id', tables:['부서','직원','프로젝트','참여'], render(){ return `
+    <h2>🎉 관계형 데이터베이스 정리</h2>
+    <p>관계형 데이터베이스 = <b>주제별로 나눈 표</b> + <b>표 사이의 관계</b>예요.</p>
+    <div class="gloss">
+      <b>표 (테이블)</b><span>한 가지 주제의 정보를 담는 그릇 (직원, 부서, 프로젝트)</span>
+      <b>행 / 열</b><span>행 = 대상 하나(직원 한 명), 열 = 정보의 종류(이름, 직급)</span>
+      <b>🔑 기본 키</b><span>표 안에서 한 줄을 정확히 가리키는 값 (사번, 부서 번호)</span>
+      <b>🔗 외래 키</b><span>다른 표의 기본 키를 가리켜서 두 표를 잇는 칸 (부서번호)</span>
+      <b>관계</b><span>1 : 1, 1 : 다, 다 : 다. 다 : 다는 중간 표로 이어요</span>
+      <b>숫자 ID (대리 키)</b><span>이름처럼 바뀌거나 겹칠 수 있는 값 대신, 구분용으로 붙인 번호를 키로 쓰기</span>
+      <b>정규화</b><span>"한 가지 정보는 한 곳에만" 적히도록 표를 알맞게 나누기</span>
+      <b>참조 무결성</b><span>없는 곳을 가리키거나 연결이 끊어지지 않게 지키기</span>
+      <b class="sql-only">JOIN</b><span class="sql-only">나눈 표를 키로 이어서 보기</span>
+    </div>
+    <h3>표를 나누면 좋은 점</h3>
+    <ul>
+      <li>같은 정보가 한 곳에만 있어서 <b>고칠 때 한 번만</b> 고치면 돼요.</li>
+      <li>숫자 ID로 이어 두면 이름이 바뀌거나 겹쳐도 <b>연결은 그대로</b>예요.</li>
+      <li>같은 걸 다시 쓸 일이 없어서 <b>오타가 줄어요</b>.</li>
+      <li>하나를 지워도 <b>다른 정보는 안전해요</b>.</li>
+      <li>데이터베이스가 <b>연결을 지켜 줘서</b> 엉뚱한 데이터가 생기지 않아요.</li>
+    </ul>
+    <h3>대표적인 관계형 데이터베이스</h3>
+    <p class="muted">MySQL, PostgreSQL, Oracle, SQL Server, SQLite 등이 있어요. 모두 표와 관계로 데이터를 다루고, SQL이라는 같은 언어로 말을 걸어요.</p>
+    <button class="btn ghost" id="again">처음부터 다시 하기</button>`; },
+    init(){ $('#again').onclick = () => { resetDB('name'); hl = {}; go(0); }; } },
+];
+
+/* =========================================================
+   4. 단계 이동
+   ========================================================= */
+let cur = 0;
+const visited = new Set([0]);
+const visibleSteps = () => STEPS.map((s,i)=>i).filter(i => sqlOn || !STEPS[i].sqlOnly);
+function stepLabel(i){ return `${visibleSteps().indexOf(i)+1}. ${STEPS[i].name}`; }
+function renderNav(){
+  const vis = visibleSteps(), k = vis.indexOf(cur), prev = vis[k-1], next = vis[k+1];
+  $('#nav').innerHTML = `
+      <button class="btn ghost" id="prev" ${prev===undefined?'disabled':''}>← 이전</button>
+      ${next!==undefined ? `<button class="btn" id="next">다음: ${STEPS[next].name} →</button>` : ''}`;
+  if (prev!==undefined) $('#prev').onclick = () => go(prev);
+  if (next!==undefined) $('#next').onclick = () => go(next);
+}
+function applySql(){
+  document.body.classList.toggle('sql-off', !sqlOn);
+  $('#sqlToggle').checked = sqlOn;
+  try { localStorage.setItem('db-exp-sql', sqlOn ? '1' : '0'); } catch(e){}
+}
+function go(i){
+  STEPS[cur].leave && STEPS[cur].leave();
+  cur = i; visited.add(i);
+  hl = {};
+  const s = STEPS[i];
+  if (s.schema==='id') toIdSchema();          // 숫자 ID 단계부터는 지금 데이터에 번호를 붙여서 이어 감
+  else if (s.schema==='name') toNameSchema(); // 앞 단계로 돌아가면 부서 이름 키 버전으로 새로 시작
+  $('#lesson').innerHTML = s.render() + `<div class="nav" id="nav"></div>`;
+  renderNav();
+  renderDB();
+  s.init && s.init();
+  renderSteps();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function renderSteps(){
+  $('#steps').innerHTML = visibleSteps().map(i => `<button class="${i===cur?'on':visited.has(i)?'done':''}" data-i="${i}">${stepLabel(i)}</button>`).join('');
+  document.querySelectorAll('#steps button').forEach(b => b.onclick = () => go(+b.dataset.i));
+}
+$('#dbView').addEventListener('click', e => {
+  const td = e.target.closest('td[data-c]'); if (!td) return;
+  const s = STEPS[cur];
+  if (s.onCell) s.onCell.call(s, {table: td.closest('table').dataset.t, id: +td.parentElement.dataset.id, col: td.dataset.c});
+});
+$('#resetBtn').onclick = () => { resetDB(STEPS[cur].schema || 'id'); hl = {}; go(cur); };
+$('#sqlToggle').onchange = e => {
+  sqlOn = e.target.checked; applySql();
+  if (!sqlOn && STEPS[cur].sqlOnly){ const vis = visibleSteps(); go(vis.find(i => i > cur) ?? vis[vis.length-1]); }
+  else { renderSteps(); renderNav(); }
+};
+applySql();
+go(0);
+</script>
+</body>
+</html>

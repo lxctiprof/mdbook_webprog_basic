@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>과일 퀴즈</title>
+    <style>        
+        @font-face {
+            font-family: 'GangwonEducationModuLight';
+            src: url('../../fonts/GangwonEduModu-Light.woff2') format('woff2');
+            font-weight: 300;
+            font-display: auto;
+        }
+
+        @font-face {
+            font-family: 'GangwonEducationModuBold';
+            src: url('../../fonts/GangwonEduModu-Bold.woff2') format('woff2');
+            font-weight: 700;
+            font-display: auto;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 100vw;
+            margin: 5px;
+            padding: 5px;
+            background-color: #f9f9f9;            
+        }
+        .quiz-card {
+            background-color: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .question {
+            font-family: "GangwonEducationModuBold";
+            font-size: 1.4rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        .quiz-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;            
+        }
+        .option-btn {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.2rem;            
+            transition: background-color 0.2s;
+            font-family: "GangwonEducationModuLight";
+        }
+        .option-btn:hover {
+            background-color: #f0f0f0;
+        }
+        .option-btn_ans {
+            padding: 10px 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #fff;
+            cursor: pointer;
+            text-align: left;
+            font-size: 1.2rem;
+            transition: background-color 0.2s;
+            font-family: "GangwonEducationModuLight";
+        }
+        .option-btn_ans:hover {
+            background-color: #f0f0f0;
+            border-radius: 3px;
+        }
+        .result {
+            margin-top: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+        .correct {
+            color: #2e7d32;
+        }
+        .incorrect {
+            color: #c62828;
+        }
+        .loading, .error-message {
+            text-align: center;
+            font-size: 1.1rem;
+            color: #666;
+            padding: 20px;
+        }
+        .error-message {
+            color: #c62828;
+        }
+    </style>
+</head>
+<body>
+    <div id="quiz-container">
+        <div class="loading">퀴즈 데이터를 불러오는 중...</div>
+    </div>
+
+    <script>
+        const IMAGE_BASE_PATH = "attachments/";
+        let quizData = [];
+
+        // URL의 쿼리 스트링(?id=파일명)에서 파일 이름 추출
+        function getJsonFileNameFromUrl() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const fileId = urlParams.get('id');
+
+            // id 파라미터가 있으면 '파일명.json', 없으면 기본값 'quiz.json' 사용
+            if (fileId && fileId.trim() !== '') {
+                return `${fileId.trim()}.json`;
+            } else {
+                return 'quiz.json'; // 기본 파일명
+            }
+        }
+
+        // 외부 JSON 파일 불러오기
+        async function loadQuizData() {
+            const container = document.getElementById('quiz-container');
+            const jsonFileName = getJsonFileNameFromUrl();
+
+            try {
+                const response = await fetch(jsonFileName);
+                
+                if (!response.ok) {
+                    throw new Error(`'${jsonFileName}' 파일을 찾을 수 없거나 불러올 수 없습니다. (상태 코드: ${response.status})`);
+                }
+
+                quizData = await response.json();
+                renderQuiz();
+            } catch (error) {
+                console.error("JSON 로딩 실패:", error);
+                container.innerHTML = `<div class="error-message">퀴즈 데이터를 불러오지 못했습니다.<br>(${error.message})</div>`;
+            }
+        }
+
+        // 퀴즈 화면 출력
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = ''; 
+
+            quizData.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = 'quiz-card';
+
+                // 1. 문제 (q)
+                const questionEl = document.createElement('div');
+                questionEl.className = 'question';
+                questionEl.textContent = `${item.no}. ${item.q}`;
+                card.appendChild(questionEl);
+
+                // 2. 이미지 (img)
+                if (item.img && item.img.trim() !== "") {
+                    const imgEl = document.createElement('img');
+                    imgEl.src = IMAGE_BASE_PATH + item.img;
+                    imgEl.alt = `문제 ${item.no} 이미지`;
+                    imgEl.className = 'quiz-image';
+
+                    imgEl.onerror = () => {
+                        console.error(`이미지를 불러올 수 없습니다: ${imgEl.src}`);
+                    };
+
+                    card.appendChild(imgEl);
+                }
+
+                // 3. 보기 (a1 ~ a4)
+                const optionsEl = document.createElement('div');
+                const ar_circle = ['①', '②', '③', '④', '⑤'];
+                optionsEl.className = 'options';
+
+                for (let i = 1; i <= 4; i++) {
+                    const btn = document.createElement('button');
+
+                    if (i == item.ans)
+                    {
+                      btn.className = 'option-btn_ans';
+                    }
+                    else
+                    {
+                      btn.className = 'option-btn';
+                    }
+                    
+                    //btn.textContent = `${i}) ${item['a' + i]}`;
+                    btn.textContent = `${ar_circle[i-1]} ${item['a' + i]}`;
+
+                    // 마우스 호버 이벤트 설정
+                    /*
+                    btn.onmouseenter = () => {
+                        if (i === item.ans) {
+                            const caption = `${i}) ${item['a' + i]}`;
+                            btn.textContent = caption.replace(".", ",");
+                        } else {
+                            // 오답 위에 올렸을 때: 원래 상태
+                            btn.textContent = `${i}) ${item['a' + i]}`;
+                        }
+                    };
+
+                    // 마우스가 버튼을 벗어나면 원래 상태
+                    btn.onmouseleave = () => {
+                        btn.textContent = `${i}) ${item['a' + i]}`;
+                    };
+                    */
+                    
+                    btn.onclick = () => checkAnswer(index, i, resultEl);
+                    optionsEl.appendChild(btn);
+                }
+                card.appendChild(optionsEl);
+
+                // 4. 결과 표시
+                const resultEl = document.createElement('div');
+                resultEl.className = 'result';
+                card.appendChild(resultEl);
+
+                container.appendChild(card);
+            });
+        }
+
+        // 정답 체크
+        function checkAnswer(quizIndex, selectedOption, resultElement) {
+            const correctAnswer = quizData[quizIndex].ans;
+
+            if (selectedOption === correctAnswer) {
+                resultElement.textContent = "⭕ 정답입니다!";
+                resultElement.className = "result correct";
+            } else {
+                resultElement.textContent = "❌ 틀렸습니다. 다시 시도해보세요.";
+                resultElement.className = "result incorrect";
+            }
+        }
+
+        // 페이지 로드 시 실행
+        loadQuizData();
+    </script>
+</body>
+</html>

@@ -1,0 +1,72 @@
+[
+  {
+    "no": 1,
+    "q": "postgreSQL에 접속하는 방법 2가지로 맞는 것은?",
+    "img": "",
+    "a1": "postgreSQL 앱, pgAdmin",
+    "a2": "pgAdmin, psql",
+    "a3": "postgreSQL 앱, psql",
+    "a4": "postgreSQL에는 접속할 수 없다",    
+    "ans": 2
+  }
+  , {
+  "no": 2,
+  "q": "create user scott password 'tiger'; 이 코드를 통해 할 수 있는 것은?",
+  "img": "",
+  "a1": "DB를 생성한다.",
+  "a2": "user를 생성한다.",
+  "a3": "테이블을 생성한다.",
+  "a4": "postgreSQL을 설치한다",
+  "ans": 2
+  }
+  , {
+  "no": 3,
+  "q": "create database testdb owner scott; 이 코드를 통해 할 수 있는 것은?",
+  "img": "",
+  "a1": "DB를 생성한다.",
+  "a2": "user를 생성한다.",
+  "a3": "테이블을 생성한다.",
+  "a4": "postgreSQL을 설치한다",
+  "ans": 1
+  }
+  , {
+  "no": 4,
+  "q": "생성한 데이터베이스의 목록을 확인하는 방법은?",
+  "img": "",
+  "a1": "\\l",
+  "a2": "\\db",
+  "a3": "\\dt",
+  "a4": "\\d",
+  "ans": 1
+  }
+  , {
+  "no": 5,
+  "q": "postgreSQL의 기본 포트는?",
+  "img": "",
+  "a1": "5115",
+  "a2": "5552",
+  "a3": "7704",
+  "a4": "5432",
+  "ans": 4
+  }
+  , {
+  "no": 6,
+  "q": "SQL의 약자로 적합한 것은?",
+  "img": "",
+  "a1": "Struct Query Language",
+  "a2": "Struct Question Language",
+  "a3": "Structured Question Language",
+  "a4": "Structured Query Language",
+  "ans": 4
+  }
+  , {
+  "no": 7,
+  "q": "SQL에서 주로 사용하는 핵심 명령어가 아닌 것은?",
+  "img": "",
+  "a1": "select: 데이터 검색",
+  "a2": "insert: 데이터 입력",
+  "a3": "update: 데이터 수정",
+  "a4": "delete: 테이블 삭제",
+  "ans": 4
+  }
+  ]

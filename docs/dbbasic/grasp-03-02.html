@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOT NULL 체험관</title>
+<style>
+  :root{
+    --bg:#f6f4ef; --panel:#ffffff; --ink:#1f2328; --sub:#5b616b; --line:#e3dfd6;
+    --accent:#2f6fdb; --accent-soft:#e6eefc; --good:#1f8a5b; --good-soft:#e3f4ec;
+    --bad:#c4402f; --bad-soft:#fbe9e6; --warn:#b7791f; --warn-soft:#fdf3e1;
+    --hl:#fff1b8; --code:#14213d;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:"Pretendard","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
+    font-size:15px;line-height:1.65}
+  header{padding:18px 28px 10px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+  header h1{font-size:20px;margin:0;letter-spacing:-.3px}
+  header h1 span{color:var(--accent)}
+  .stepsBar{display:flex;gap:12px;align-items:flex-start;padding:0 28px 14px}
+  .steps{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+  .sqlToggle{display:flex;align-items:center;gap:6px;border:1px solid var(--line);background:var(--panel);border-radius:999px;
+    padding:4px 12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;user-select:none}
+  .sqlToggle input{margin:0;width:15px;height:15px;accent-color:var(--code);cursor:pointer}
+  .sqlToggle:has(input:checked){background:var(--code);color:#fff;border-color:var(--code)}
+  body.sql-off .sql, body.sql-off .sqlLabel, body.sql-off .sql-only{display:none!important}
+  body:not(.sql-off) .nosql-only{display:none!important}
+  .steps button{border:1px solid var(--line);background:var(--panel);color:var(--sub);
+    border-radius:999px;padding:5px 12px;font:inherit;font-size:13px;cursor:pointer}
+  .steps button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .steps button.done{color:var(--good);border-color:#b9dfcb}
+  main{display:grid;grid-template-columns:minmax(340px,1fr) minmax(380px,1.15fr);gap:20px;padding:0 28px 28px;align-items:start}
+  main > *{min-width:0}
+  @media (max-width:900px){
+    main{grid-template-columns:1fr;padding:0 12px 20px}
+    header,.stepsBar{padding-left:12px;padding-right:12px}
+    #dbCard{position:static}
+    .card{padding:18px 16px}
+    .grid3{grid-template-columns:1fr}
+    label.f{grid-template-columns:1fr}
+  }
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:22px 24px}
+  #dbCard{position:sticky;top:12px}
+  h2{font-size:22px;margin:0 0 6px;letter-spacing:-.4px}
+  h3{font-size:15px;margin:20px 0 6px}
+  p{margin:8px 0}
+  .muted{color:var(--sub)}
+  .term{background:var(--accent-soft);color:var(--accent);padding:0 5px;border-radius:4px;font-weight:600}
+  .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+  .mini{border:1px solid var(--line);border-radius:10px;padding:12px;background:#fbfaf7}
+  .mini b{display:block;margin-bottom:2px}
+  .mini small{color:var(--sub)}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+  .chip{border-radius:8px;padding:6px 10px;font-weight:600;font-size:14px}
+  .c-ins{background:var(--good-soft);color:var(--good)}
+  .c-sel{background:var(--accent-soft);color:var(--accent)}
+  .c-upd{background:var(--warn-soft);color:var(--warn)}
+  .c-del{background:var(--bad-soft);color:var(--bad)}
+  .nav{display:flex;justify-content:space-between;margin-top:24px;gap:8px}
+  button.btn{font:inherit;border:0;border-radius:9px;padding:9px 16px;cursor:pointer;font-weight:600;background:var(--accent);color:#fff}
+  button.btn:hover{filter:brightness(1.07)}
+  button.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+  button.btn.green{background:var(--good)}
+  button.btn.red{background:var(--bad)}
+  button.btn.orange{background:var(--warn)}
+  button.btn.small{padding:5px 10px;font-size:13px}
+  button.btn:disabled{opacity:.4;cursor:default}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:8px 0}
+  label.f{display:grid;grid-template-columns:110px 1fr;gap:8px;align-items:center;margin:6px 0}
+  label.f span{color:var(--sub);font-size:14px}
+  input,select,textarea{font:inherit;border:1px solid #cfcac0;border-radius:8px;padding:6px 9px;background:#fff;color:var(--ink)}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+  .sql{background:var(--code);color:#e8ecf5;border-radius:10px;padding:12px 14px;font-family:"D2Coding","Consolas","Menlo",monospace;
+    font-size:14px;white-space:pre-wrap;word-break:break-all;margin:8px 0}
+  .sql .k{color:#7fb4ff;font-weight:700}
+  .sql .s{color:#ffd28a}
+  .sql .n{color:#9be3b0}
+  .sqlLabel{font-size:12px;color:var(--sub);margin-top:14px}
+  .msg{border-radius:10px;padding:10px 13px;margin:10px 0;font-size:14px}
+  .msg.ok{background:var(--good-soft);color:#155f3f}
+  .msg.err{background:var(--bad-soft);color:#8e2a1e}
+  .msg.info{background:var(--accent-soft);color:#1f4c99}
+  .msg.warn{background:var(--warn-soft);color:#7a4f0e}
+  .tip{border-left:3px solid var(--warn);padding:4px 12px;margin:12px 0;color:#6b4a12;background:#fffaf0;border-radius:0 8px 8px 0;font-size:14px}
+
+  /* 데이터베이스 표 */
+  .dbHead{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+  .dbHead h2{font-size:17px}
+  .tbl{margin:14px 0 4px}
+  .tblName{font-weight:700;font-size:14px;margin-bottom:4px;display:flex;gap:8px;align-items:baseline}
+  .tblName small{font-weight:400;color:var(--sub)}
+  .scroll{overflow-x:auto;border:1px solid var(--line);border-radius:10px}
+  table{border-collapse:collapse;width:100%;font-size:14px}
+  th,td{padding:7px 10px;text-align:left;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{background:#f2efe8;font-weight:700;font-size:13px}
+  th .ty{display:block;font-weight:400;font-size:11px;color:var(--sub)}
+  tr:last-child td{border-bottom:0}
+  #dbView td{cursor:pointer}
+  #dbView tbody tr:hover td{background:#faf8f3}
+  td.null{color:#aaa;font-style:italic}
+  tr.hl td{background:var(--hl)!important}
+  tr.sel td{background:#dbe7fd!important}
+  tr.flash td{animation:flash 1.6s ease-out}
+  @keyframes flash{0%{background:#9fe0bd}100%{background:transparent}}
+  .fcol{background:#fff8d6!important}
+  .frow td{background:#eef4ff!important}
+  td.fcell{background:#ffd966!important;font-weight:700}
+  .pk{color:var(--warn)}
+  .result .scroll{margin-top:6px}
+  .examples{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+  .examples button{text-align:left;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:12.5px;background:#f6f4ef;border:1px solid var(--line);
+    border-radius:8px;padding:6px 9px;cursor:pointer;color:var(--code)}
+  .examples button:hover{border-color:var(--accent)}
+  textarea{width:100%;min-height:110px;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:14px}
+  .cheat{display:grid;grid-template-columns:auto 1fr;gap:4px 12px;font-size:13.5px;margin:8px 0}
+  .cheat code{font-family:"D2Coding","Consolas","Menlo",monospace;color:var(--accent);font-weight:700}
+  .history{font-family:"D2Coding","Consolas","Menlo",monospace;font-size:12.5px;color:var(--sub);max-height:140px;overflow:auto}
+  .history div{padding:3px 0;border-bottom:1px dashed var(--line)}
+  .history .x{color:var(--bad)}
+  .gloss{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;margin:10px 0}
+  .gloss b{white-space:nowrap}
+  ul{padding-left:20px;margin:6px 0}
+  .linkbox{display:flex;gap:10px;align-items:center;justify-content:center;margin:12px 0;font-size:14px;flex-wrap:wrap}
+  .linkbox .tag{border:1px solid var(--line);border-radius:8px;padding:6px 10px;background:#fbfaf7}
+  .linkbox .arrow{color:var(--accent);font-weight:700}
+  .bd{display:inline-block;font-size:10.5px;font-weight:700;border-radius:5px;padding:0 5px;margin:2px 3px 0 0;white-space:nowrap}
+  .bd.pk{background:var(--warn-soft);color:var(--warn)}
+  .bd.uq{background:#f3e8ff;color:#7a3db8}
+  .bd.fk{background:var(--accent-soft);color:var(--accent)}
+  .bd.rq{background:#eee;color:var(--sub)}
+  .exp{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin:10px 0;background:#fcfbf8}
+  .exp b.t{display:block;margin-bottom:4px}
+  .quiz{border:1px solid var(--line);border-radius:12px;padding:10px 14px;margin:8px 0}
+  .quiz .q{font-weight:700;margin-bottom:6px}
+  .quiz .row{margin:4px 0}
+  .compare{width:100%;margin:10px 0}
+  .compare td,.compare th{white-space:normal}
+  .boxes{display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin:12px 0}
+  .box{border:1px solid var(--line);border-radius:8px;padding:6px 0;text-align:center;font-family:"D2Coding","Consolas","Menlo",monospace;font-size:13px;background:#fff;transition:all .15s}
+  .box.look{background:#ffd966;border-color:#e0b100;transform:scale(1.06)}
+  .box.found{background:var(--good-soft);border-color:var(--good);color:var(--good);font-weight:700}
+  .box.out{opacity:.25}
+  .bars{display:grid;grid-template-columns:auto 1fr auto;gap:8px 12px;align-items:center;margin:10px 0;font-size:14px}
+  .bar{height:16px;border-radius:5px;min-width:3px}
+  .bar.lin{background:var(--bad)}
+  .bar.bin{background:var(--good)}
+  .seg{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+  .seg button.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+  .bd.nn{background:var(--bad-soft);color:var(--bad)}
+  .bd.df{background:var(--good-soft);color:var(--good)}
+  td.blank{color:#8a5a00;font-style:italic;outline:1px dashed #e0b100;outline-offset:-4px}
+  .vs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0}
+  .vs .mini b{font-size:15px}
+</style>
+</head>
+<body class="sql-off">
+<header>
+  <h1>NOT NULL <span>체험관</span></h1>
+  <span class="muted">비어 있으면 안 되는 칸을 지키는 규칙</span>
+</header>
+<div class="stepsBar">
+  <div class="steps" id="steps"></div>
+  <label class="sqlToggle" title="SQL(데이터베이스에게 말을 거는 언어) 관련 내용 보이기/감추기"><input type="checkbox" id="sqlToggle"> SQL</label>
+</div>
+<main>
+  <section class="card" id="lesson"></section>
+  <section class="card" id="dbCard">
+    <div class="dbHead">
+      <h2>🗄️ '우리 회사' 데이터베이스</h2>
+      <button class="btn ghost small" id="resetBtn">처음 상태로 되돌리기</button>
+    </div>
+    <div class="muted" style="font-size:13px">지금 데이터베이스 안에 실제로 들어 있는 내용이에요. 열 이름 아래 <span class="bd nn">🚫 빈칸 금지</span> 표시가 NOT NULL이에요.</div>
+    <div id="dbView"></div>
+  </section>
+</main>
+
+<script>
+/* =========================================================
+   1. NOT NULL 규칙을 지키는 아주 작은 데이터베이스 엔진
+   ========================================================= */
+const SEED = {
+  직원: {
+    columns: [
+      {name:'사번', type:'num', pk:true},
+      {name:'이름', type:'text', notnull:true},
+      {name:'입사일', type:'text', notnull:true},
+      {name:'전화번호', type:'text'},
+      {name:'퇴사일', type:'text'},
+      {name:'상태', type:'text', notnull:true, def:'재직'},
+    ],
+    rows: [
+      {사번:1001, 이름:'김민준', 입사일:'2008-03-03', 전화번호:'010-1234-5678', 퇴사일:null, 상태:'재직'},
+      {사번:1002, 이름:'이서연', 입사일:'2019-07-01', 전화번호:null, 퇴사일:null, 상태:'재직'},
+      {사번:1003, 이름:'박도윤', 입사일:'2023-01-02', 전화번호:'010-2222-3333', 퇴사일:null, 상태:'재직'},
+      {사번:1004, 이름:'최지우', 입사일:'2015-05-11', 전화번호:'010-4444-5555', 퇴사일:'2025-12-31', 상태:'퇴사'},
+      {사번:1005, 이름:'정하준', 입사일:'2020-09-01', 전화번호:null, 퇴사일:null, 상태:'휴직'},
+      {사번:1006, 이름:'강수아', 입사일:'2024-02-01', 전화번호:'010-6666-7777', 퇴사일:null, 상태:'재직'},
+      {사번:1007, 이름:'한예린', 입사일:'2025-08-18', 전화번호:'010-8888-9999', 퇴사일:null, 상태:'재직'},
+    ]
+  },
+  옛날명부: {
+    columns: [
+      {name:'이름', type:'text'},
+      {name:'입사일', type:'text'},
+      {name:'전화번호', type:'text'},
+    ],
+    rows: [
+      {이름:'김민준', 입사일:'2008-03-03', 전화번호:'010-1234-5678'},
+      {이름:'이서연', 입사일:'2019-07-01', 전화번호:null},
+      {이름:'박도윤', 입사일:'2023-01-02', 전화번호:'010-2222-3333'},
+    ]
+  }
+};
+let db, ridSeq = 1;
+function resetDB(){
+  db = JSON.parse(JSON.stringify(SEED));
+  for (const t of Object.values(db)) t.rows.forEach(r => r.__rid = ridSeq++);
+}
+resetDB();
+
+class SqlError extends Error {}
+const KW = new Set(['SELECT','FROM','WHERE','AND','OR','NOT','INSERT','INTO','VALUES','UPDATE','SET','DELETE',
+  'ORDER','BY','ASC','DESC','LIMIT','JOIN','INNER','ON','LIKE','AS','NULL','IS','COUNT']);
+
+function tokenize(src){
+  const toks = [];
+  const re = /\s+|--[^\n]*|'((?:[^']|'')*)'|"((?:[^"]|"")*)"|(-?\d+(?:\.\d+)?)|([\p{L}_][\p{L}\p{N}_]*)|(<=|>=|<>|!=|==|[=<>(),.*;])/uy;
+  let i = 0;
+  while (i < src.length){
+    re.lastIndex = i;
+    const m = re.exec(src);
+    if (!m){
+      if (src[i] === "'" || src[i] === '"') throw new SqlError(`따옴표(${src[i]})가 열렸는데 닫히지 않았어요. 글자 값은 '김민준' 처럼 앞뒤를 모두 감싸 주세요.`);
+      throw new SqlError(`'${src[i]}' 기호는 이해하지 못했어요.`);
+    }
+    i = re.lastIndex;
+    if (m[1] !== undefined) toks.push({t:'str', v:m[1].replace(/''/g,"'")});
+    else if (m[2] !== undefined) toks.push({t:'str', v:m[2].replace(/""/g,'"')});
+    else if (m[3] !== undefined) toks.push({t:'num', v:Number(m[3])});
+    else if (m[4] !== undefined){
+      const up = m[4].toUpperCase();
+      if (KW.has(up)) toks.push({t:'kw', v:up}); else toks.push({t:'id', v:m[4]});
+    }
+    else if (m[5] !== undefined) toks.push({t:'sym', v: m[5]==='==' ? '=' : m[5]});
+  }
+  return toks;
+}
+
+function parse(src){
+  const toks = tokenize(src);
+  let p = 0;
+  const peek = () => toks[p];
+  const isKw = k => toks[p] && toks[p].t==='kw' && toks[p].v===k;
+  const isSym = s => toks[p] && toks[p].t==='sym' && toks[p].v===s;
+  const eatKw = k => { if (isKw(k)){ p++; return true; } return false; };
+  const eatSym = s => { if (isSym(s)){ p++; return true; } return false; };
+  const near = () => toks[p] ? ` ('${toks[p].v}' 근처)` : ' (문장 끝)';
+  const needKw = (k, msg) => { if (!eatKw(k)) throw new SqlError((msg || `여기에 ${k} 가 와야 해요.`) + near()); };
+  const needSym = (s, msg) => { if (!eatSym(s)) throw new SqlError((msg || `여기에 '${s}' 기호가 와야 해요.`) + near()); };
+  const ident = what => {
+    const t = toks[p];
+    if (t && t.t==='id'){ p++; return t.v; }
+    throw new SqlError(`여기에 ${what} 이름이 와야 해요.` + near());
+  };
+  const colref = () => {
+    const a = ident('열(칸)');
+    if (eatSym('.')) return {k:'col', table:a, col:ident('열(칸)')};
+    return {k:'col', col:a};
+  };
+  function expr(){ return orE(); }
+  function orE(){ let l = andE(); while (eatKw('OR')) l = {k:'or', l, r:andE()}; return l; }
+  function andE(){ let l = notE(); while (eatKw('AND')) l = {k:'and', l, r:notE()}; return l; }
+  function notE(){ if (eatKw('NOT')) return {k:'not', e:notE()}; return cmp(); }
+  function cmp(){
+    const l = prim();
+    if (eatKw('IS')){ const neg = eatKw('NOT'); needKw('NULL', 'IS 다음에는 NULL(비어 있음)이 와야 해요.'); return {k:'isnull', e:l, neg}; }
+    let neg = false;
+    if (isKw('NOT') && toks[p+1] && toks[p+1].v==='LIKE'){ p++; neg = true; }
+    if (eatKw('LIKE')) return {k:'like', l, r:prim(), neg};
+    const t = peek();
+    if (t && t.t==='sym' && ['=','!=','<>','<','>','<=','>='].includes(t.v)){ p++; return {k:'cmp', op:t.v, l, r:prim()}; }
+    return l;
+  }
+  function prim(){
+    const t = peek();
+    if (!t) throw new SqlError('문장이 중간에 끝났어요. 뒤에 무언가가 더 있어야 해요.');
+    if (t.t==='num' || t.t==='str'){ p++; return {k:'lit', v:t.v}; }
+    if (isKw('NULL')){ p++; return {k:'lit', v:null}; }
+    if (eatSym('(')){ const e = expr(); needSym(')', "괄호 ')' 가 닫히지 않았어요."); return e; }
+    if (t.t==='id') return colref();
+    throw new SqlError(`'${t.v}'는 이 자리에 올 수 없어요.`);
+  }
+
+  let stmt;
+  if (eatKw('SELECT')){
+    const items = [];
+    do {
+      let it;
+      if (eatSym('*')) it = {k:'star'};
+      else if (eatKw('COUNT')){
+        needSym('(', "COUNT 다음에는 '(' 가 와야 해요. 예: COUNT(*)");
+        let cc = null;
+        if (!eatSym('*')) cc = colref();
+        needSym(')', "COUNT( 의 괄호가 닫히지 않았어요.");
+        it = {k:'count', col:cc};
+      } else it = {k:'expr', e:colref()};
+      if (eatKw('AS')) it.as = ident('별명');
+      items.push(it);
+    } while (eatSym(','));
+    needKw('FROM', 'SELECT 로 보여줄 칸을 적은 다음에는 FROM 표이름 이 와야 해요.');
+    const from = ident('표');
+    let join = null;
+    if (isKw('INNER') || isKw('JOIN')){
+      eatKw('INNER'); needKw('JOIN');
+      const t = ident('표');
+      needKw('ON', 'JOIN 표이름 다음에는 ON 으로 어떻게 연결할지 적어야 해요.');
+      join = {table:t, on:expr()};
+    }
+    let where = null, order = [], limit = null;
+    if (eatKw('WHERE')) where = expr();
+    if (eatKw('ORDER')){
+      needKw('BY', 'ORDER 다음에는 BY 가 와야 해요. (ORDER BY)');
+      do { const c = colref(); let desc = false; if (eatKw('DESC')) desc = true; else eatKw('ASC'); order.push({c, desc}); } while (eatSym(','));
+    }
+    if (eatKw('LIMIT')){ const t = peek(); if (!t || t.t!=='num') throw new SqlError('LIMIT 다음에는 숫자가 와야 해요.'); p++; limit = t.v; }
+    stmt = {type:'select', items, from, join, where, order, limit};
+  }
+  else if (eatKw('INSERT')){
+    needKw('INTO', 'INSERT 다음에는 INTO 가 와야 해요. (INSERT INTO)');
+    const table = ident('표');
+    let cols = null;
+    if (eatSym('(')){ cols = []; do cols.push(ident('열(칸)')); while (eatSym(',')); needSym(')'); }
+    needKw('VALUES', '입력할 값 앞에는 VALUES 가 와야 해요.');
+    const tuples = [];
+    do {
+      needSym('(', "VALUES 다음에는 ( 값, 값, ... ) 모양으로 적어요.");
+      const vals = [];
+      do {
+        const t = peek();
+        if (t && (t.t==='num' || t.t==='str')){ p++; vals.push(t.v); }
+        else if (isKw('NULL')){ p++; vals.push(null); }
+        else if (t && t.t==='id') throw new SqlError(`'${t.v}' 가 무엇인지 모르겠어요. 글자 값이라면 '${t.v}' 처럼 작은따옴표로 감싸 주세요.`);
+        else throw new SqlError('여기에 입력할 값(숫자나 \'글자\')이 와야 해요.' + near());
+      } while (eatSym(','));
+      needSym(')', "값 목록의 괄호 ')' 가 닫히지 않았어요.");
+      tuples.push(vals);
+    } while (eatSym(','));
+    stmt = {type:'insert', table, cols, tuples};
+  }
+  else if (eatKw('UPDATE')){
+    const table = ident('표');
+    needKw('SET', 'UPDATE 표이름 다음에는 SET 열 = 값 이 와야 해요.');
+    const sets = [];
+    do { const c = ident('열(칸)'); needSym('=', "SET 열 다음에는 '=' 가 와야 해요."); sets.push({col:c, e:prim()}); } while (eatSym(','));
+    let where = null;
+    if (eatKw('WHERE')) where = expr();
+    stmt = {type:'update', table, sets, where};
+  }
+  else if (eatKw('DELETE')){
+    needKw('FROM', 'DELETE 다음에는 FROM 이 와야 해요. (DELETE FROM 표이름)');
+    const table = ident('표');
+    let where = null;
+    if (eatKw('WHERE')) where = expr();
+    stmt = {type:'delete', table, where};
+  }
+  else {
+    const t = peek();
+    if (!t) throw new SqlError('아무것도 적혀 있지 않아요.');
+    throw new SqlError(`문장은 SELECT, INSERT, UPDATE, DELETE 중 하나로 시작해야 해요. ('${t.v}'로 시작했어요)`);
+  }
+  eatSym(';');
+  if (p < toks.length) throw new SqlError(`문장이 끝났어야 하는데 뒤에 더 있어요.` + near());
+  return stmt;
+}
+
+function getTable(name){
+  if (!db[name]) throw new SqlError(`'${name}'(이)라는 표는 없어요. 있는 표: ${Object.keys(db).join(', ')}`);
+  return db[name];
+}
+const pkOf = t => t.columns.find(c => c.pk);
+const label = (t, r) => r.이름 != null && String(r.이름).trim() ? `'${r.이름}'` : (pkOf(t) ? `${r[pkOf(t).name]}번` : '그 줄');
+function toNum(v){
+  if (typeof v==='number') return v;
+  if (typeof v==='string' && /^-?\d+(\.\d+)?$/.test(v.trim())) return Number(v);
+  return null;
+}
+function cmpVals(a, b){
+  if (a==null || b==null) return null;
+  const na = toNum(a), nb = toNum(b);
+  if (na!==null && nb!==null) return na<nb ? -1 : na>nb ? 1 : 0;
+  return String(a).localeCompare(String(b), 'ko');
+}
+function qualify(tname, r){
+  const o = {__src:{[tname]: r.__rid}};
+  for (const c of db[tname].columns) o[tname+'.'+c.name] = r[c.name];
+  return o;
+}
+function resolve(row, ref){
+  if (ref.table){
+    const key = ref.table+'.'+ref.col;
+    if (key in row) return row[key];
+    if (!db[ref.table]) throw new SqlError(`'${ref.table}'(이)라는 표는 없어요.`);
+    throw new SqlError(`'${ref.table}' 표에는 '${ref.col}' 열이 없어요.`);
+  }
+  const keys = Object.keys(row).filter(k => k!=='__src' && k.slice(k.indexOf('.')+1)===ref.col);
+  if (keys.length===1) return row[keys[0]];
+  if (keys.length===0) throw new SqlError(`'${ref.col}'(이)라는 열(칸)이 없어요. 혹시 글자 값이라면 '${ref.col}' 처럼 작은따옴표로 감싸 주세요.`);
+  throw new SqlError(`'${ref.col}'이(가) 어느 표의 열인지 헷갈려요. ${keys.join(' 또는 ')} 처럼 표 이름을 붙여 주세요.`);
+}
+function evalE(e, row){
+  switch (e.k){
+    case 'lit': return e.v;
+    case 'col': return resolve(row, e);
+    case 'cmp': {
+      const c = cmpVals(evalE(e.l,row), evalE(e.r,row));
+      if (c===null) return false;   // NULL 과의 비교는 언제나 '알 수 없음' → 거짓
+      return {'=':c===0, '!=':c!==0, '<>':c!==0, '<':c<0, '>':c>0, '<=':c<=0, '>=':c>=0}[e.op];
+    }
+    case 'like': {
+      const v = evalE(e.l,row), pat = evalE(e.r,row);
+      if (v==null || pat==null) return false;
+      const rx = new RegExp('^' + String(pat).replace(/[.*+?^${}()|[\]\\]/g,'\\$&').replace(/%/g,'.*').replace(/_/g,'.') + '$', 'is');
+      return rx.test(String(v)) !== e.neg;
+    }
+    case 'isnull': { const v = evalE(e.e,row); return (v==null) !== e.neg; }
+    case 'and': return !!evalE(e.l,row) && !!evalE(e.r,row);
+    case 'or': return !!evalE(e.l,row) || !!evalE(e.r,row);
+    case 'not': return !evalE(e.e,row);
+  }
+}
+const nnWord = () => sqlOn ? '빈칸 금지(NOT NULL)' : '빈칸 금지';
+function coerce(col, v){
+  if (v===null || v===undefined){
+    if (col.pk) throw new SqlError(`'${col.name}' 칸은 기본 키라서 비워 둘 수 없어요.`);
+    if (col.notnull) throw new SqlError(`'${col.name}' 칸은 ${nnWord()} 규칙이 걸려 있어서 비워 둘 수 없어요. 꼭 값을 넣어야 해요.`);
+    return null;
+  }
+  if (col.type==='num'){
+    const n = toNum(v);
+    if (n===null) throw new SqlError(`'${col.name}' 열에는 숫자만 입력할 수 있어요. '${v}'은(는) 숫자가 아니에요.`);
+    return n;
+  }
+  return String(v);
+}
+function checkKeys(t, finalRows, changed){
+  const pk = pkOf(t); if (!pk) return;
+  for (const r of changed){
+    const dup = finalRows.find(x => x!==r && cmpVals(x[pk.name], r[pk.name])===0);
+    if (dup) throw new SqlError(`${pk.name} ${r[pk.name]}은(는) 이미 ${label(t,dup)}에게 있어요. 기본 키는 겹치면 안 돼요.`);
+  }
+}
+const hasNullCompare = e => !!e && ((e.k==='cmp' && ((e.l.k==='lit' && e.l.v===null) || (e.r.k==='lit' && e.r.v===null))) || ['l','r','e'].some(x => e[x] && hasNullCompare(e[x])));
+const NULL_HINT = '💡 NULL은 = 나 != 로 비교할 수 없어요. "모르는 값"이라 같은지 다른지도 알 수 없거든요. IS NULL 이나 IS NOT NULL 을 써 보세요.';
+
+function execute(sql){
+  const s = parse(sql);
+  if (s.type==='select'){
+    const base = getTable(s.from);
+    let rows = base.rows.map(r => qualify(s.from, r));
+    let colKeys = base.columns.map(c => s.from+'.'+c.name);
+    if (s.join){
+      const jt = getTable(s.join.table);
+      if (s.join.table===s.from) throw new SqlError('같은 표끼리 연결하는 건 이 체험에서는 지원하지 않아요.');
+      const out = [];
+      for (const a of rows) for (const r of jt.rows){
+        const b = qualify(s.join.table, r);
+        const m = {...a, ...b, __src:{...a.__src, ...b.__src}};
+        if (evalE(s.join.on, m)) out.push(m);
+      }
+      rows = out;
+      colKeys = colKeys.concat(jt.columns.map(c => s.join.table+'.'+c.name));
+    }
+    const probe = {}; colKeys.forEach(k => probe[k]=null);
+    const check = e => { if (!e) return; if (e.k==='col') resolve(probe, e); ['l','r','e'].forEach(x => e[x] && check(e[x])); };
+    check(s.where); s.order.forEach(o => check(o.c)); s.items.forEach(it => { it.e && check(it.e); it.col && check(it.col); });
+    if (s.where) rows = rows.filter(r => evalE(s.where, r));
+    if (s.order.length){
+      rows.sort((x,y) => {
+        for (const o of s.order){
+          const a = resolve(x,o.c), b = resolve(y,o.c);
+          if (a==null && b==null) continue;
+          if (a==null) return 1; if (b==null) return -1;
+          const c = cmpVals(a,b); if (c) return o.desc ? -c : c;
+        }
+        return 0;
+      });
+    }
+    if (s.limit!==null) rows = rows.slice(0, s.limit);
+    const hint = hasNullCompare(s.where) ? NULL_HINT : '';
+    if (s.items.some(i => i.k==='count')){
+      if (s.items.length>1) throw new SqlError('이 체험에서는 COUNT는 혼자만 쓸 수 있어요. 예: SELECT COUNT(*) FROM 직원');
+      const it = s.items[0];
+      const n = it.col ? rows.filter(r => resolve(r, it.col)!=null).length : rows.length;
+      return {kind:'select', columns:[it.as || (it.col ? `${it.col.col} 개수` : '개수')], rows:[[n]], srcs:[{}], count:true, hint,
+        message: it.col ? `'${it.col.col}' 칸이 비어 있지 않은 줄은 ${n}개예요. (비어 있는 줄은 세지 않아요)` : `조건에 맞는 줄은 모두 ${n}개예요.`};
+    }
+    const shortName = k => k.slice(k.indexOf('.')+1);
+    const dup = n => colKeys.filter(k => shortName(k)===n).length > 1;
+    const cols = [];
+    for (const it of s.items){
+      if (it.k==='star') colKeys.forEach(k => cols.push({label: dup(shortName(k)) ? k : shortName(k), get: r => r[k]}));
+      else cols.push({label: it.as || (it.e.table && dup(it.e.col) ? it.e.table+'.'+it.e.col : it.e.col), get: r => resolve(r, it.e)});
+    }
+    return {kind:'select', columns:cols.map(c=>c.label), rows:rows.map(r => cols.map(c => c.get(r))), srcs:rows.map(r=>r.__src), hint,
+      message: rows.length ? `${rows.length}줄을 찾았어요.` : '조건에 맞는 줄이 하나도 없어요.'};
+  }
+  if (s.type==='insert'){
+    const t = getTable(s.table), pk = pkOf(t);
+    const cols = s.cols ? s.cols.map(n => { const c = t.columns.find(c=>c.name===n); if (!c) throw new SqlError(`'${s.table}' 표에는 '${n}' 열이 없어요.`); return c; }) : t.columns;
+    const newRows = [];
+    for (const vals of s.tuples){
+      if (vals.length !== cols.length) throw new SqlError(`열은 ${cols.length}개인데 값은 ${vals.length}개예요. 개수가 같아야 해요.`);
+      const r = {};
+      t.columns.forEach(c => r[c.name] = null);
+      cols.forEach((c,i) => r[c.name] = coerce(c, vals[i]));
+      t.columns.forEach(c => { if (!cols.includes(c)) r[c.name] = c.def!==undefined ? c.def : coerce(c, null); });
+      newRows.push(r);
+    }
+    checkKeys(t, t.rows.concat(newRows), newRows);
+    newRows.forEach(r => r.__rid = ridSeq++);
+    t.rows.push(...newRows);
+    return {kind:'change', op:'insert', table:s.table, ids:newRows.map(r=>r.__rid),
+      message:`${s.table} 표에 ${newRows.length}줄을 새로 입력했어요.` + (pk ? ` (${pk.name} ${newRows.map(r=>r[pk.name]).join(', ')})` : '')};
+  }
+  if (s.type==='update'){
+    const t = getTable(s.table);
+    const setCols = s.sets.map(st => {
+      const c = t.columns.find(c=>c.name===st.col);
+      if (!c) throw new SqlError(`'${s.table}' 표에는 '${st.col}' 열이 없어요.`);
+      return c;
+    });
+    const targets = t.rows.filter(r => !s.where || evalE(s.where, qualify(s.table, r)));
+    const clones = new Map();
+    for (const r of targets){
+      const n = {...r};
+      s.sets.forEach((st,j) => n[st.col] = coerce(setCols[j], evalE(st.e, qualify(s.table, r))));
+      clones.set(r, n);
+    }
+    checkKeys(t, t.rows.map(r => clones.get(r) || r), [...clones.values()]);
+    targets.forEach(r => Object.assign(r, clones.get(r)));
+    return {kind:'change', op:'update', table:s.table, ids:targets.map(r=>r.__rid), noWhere:!s.where, hint: hasNullCompare(s.where) ? NULL_HINT : '',
+      message: targets.length ? `${s.table} 표에서 ${targets.length}줄을 고쳤어요.` : '조건에 맞는 줄이 없어서 아무것도 바뀌지 않았어요.'};
+  }
+  if (s.type==='delete'){
+    const t = getTable(s.table);
+    const before = t.rows.length;
+    const gone = t.rows.filter(r => !s.where || evalE(s.where, qualify(s.table, r)));
+    t.rows = t.rows.filter(r => !gone.includes(r));
+    return {kind:'change', op:'delete', table:s.table, ids:[], removed:gone, noWhere:!s.where, hint: hasNullCompare(s.where) ? NULL_HINT : '',
+      message: gone.length ? `${s.table} 표에서 ${gone.length}줄을 지웠어요. (${before}줄 → ${t.rows.length}줄)` : '조건에 맞는 줄이 없어서 아무것도 지워지지 않았어요.'};
+  }
+}
+
+/* =========================================================
+   2. 화면 그리기 도우미
+   ========================================================= */
+const $ = s => document.querySelector(s);
+const esc = v => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const isBlank = v => typeof v==='string' && v.trim()==='';
+const cellHTML = (v, attrs='') => v==null ? `<td class="null"${attrs}>(비어 있음)</td>`
+  : isBlank(v) ? `<td class="blank"${attrs} title="NULL이 아니라 '보이지 않는 글자'가 들어 있어요">(빈 글자 '${esc(v)}')</td>`
+  : `<td${attrs}>${esc(v)}</td>`;
+function sqlHTML(sql){
+  return esc(sql)
+    .replace(/(&#39;(?:[^&]|&(?!#39;))*?&#39;)/g, '<span class="s">$1</span>')
+    .replace(/\b(SELECT|FROM|WHERE|AND|OR|NOT|INSERT|INTO|VALUES|UPDATE|SET|DELETE|ORDER|BY|ASC|DESC|LIMIT|JOIN|INNER|ON|LIKE|AS|NULL|IS|COUNT|CREATE|TABLE|PRIMARY|KEY|DEFAULT|CHECK|INTEGER|TEXT)\b/g, '<span class="k">$1</span>');
+}
+function lit(v, type){
+  v = (v ?? '').toString().trim();
+  if (v==='') return 'NULL';
+  if (type==='num' && /^-?\d+(\.\d+)?$/.test(v)) return v;
+  return "'" + v.replace(/'/g,"''") + "'";
+}
+let hl = {};
+let sqlOn = false;
+try { sqlOn = localStorage.getItem('db-exp-sql') === '1'; } catch(e){}
+
+const TABLE_TITLE = {직원:'📋 직원 표', 옛날명부:'📒 옛날명부 표 <span style="color:var(--bad)">(빈칸 규칙 없음)</span>'};
+function badges(c){
+  return (c.pk ? '<span class="bd pk">🔑 기본 키</span>' : '')
+    + (c.notnull || c.pk ? `<span class="bd nn">🚫 빈칸 금지${sqlOn ? ' (NOT NULL)' : ''}</span>` : '')
+    + (c.def!==undefined ? `<span class="bd df">기본값 '${esc(c.def)}'</span>` : '');
+}
+function renderDB(){
+  let h = '';
+  for (const name of (STEPS[cur].tables || ['직원'])){
+    const t = db[name], m = hl[name] || new Map();
+    h += `<div class="tbl"><div class="tblName">${TABLE_TITLE[name]} <small>${t.rows.length}줄 · ${t.columns.length}칸</small></div><div class="scroll"><table data-t="${name}"><thead><tr>`;
+    for (const c of t.columns) h += `<th>${esc(c.name)}<span class="ty">${c.type==='num'?'숫자':'글자'}</span>${badges(c)}</th>`;
+    h += '</tr></thead><tbody>';
+    if (!t.rows.length) h += `<tr><td colspan="${t.columns.length}" class="null">비어 있는 표예요</td></tr>`;
+    for (const r of t.rows){
+      h += `<tr data-id="${r.__rid}" class="${m.get(r.__rid) || ''}">`;
+      for (const c of t.columns) h += cellHTML(r[c.name], ` data-c="${esc(c.name)}"`);
+      h += '</tr>';
+    }
+    h += '</tbody></table></div></div>';
+  }
+  $('#dbView').innerHTML = h;
+}
+function setHighlight(table, ids, cls){
+  hl = {};
+  if (table){ hl[table] = new Map(); ids.forEach(id => hl[table].set(id, cls)); }
+  renderDB();
+}
+function highlightWhere(table, pred){ setHighlight(table, db[table].rows.filter(pred).map(r=>r.__rid), 'hl'); }
+function highlightSrcs(srcs){
+  hl = {};
+  srcs.forEach(s => Object.entries(s).forEach(([t,id]) => { (hl[t] ||= new Map()).set(id, 'hl'); }));
+  renderDB();
+}
+function resultTable(res){
+  let h = `<div class="scroll"><table><thead><tr>${res.columns.map(c=>`<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>`;
+  res.rows.forEach((r,i) => h += `<tr data-i="${i}">${r.map(v => cellHTML(v)).join('')}</tr>`);
+  if (!res.rows.length) h += `<tr><td colspan="${res.columns.length}" class="null">결과 없음</td></tr>`;
+  return h + '</tbody></table></div>';
+}
+function run(sql, out, opts={}){
+  let res;
+  try { res = execute(sql); }
+  catch (e){
+    if (!(e instanceof SqlError)) console.error(e);
+    out.innerHTML = `<div class="msg err">🚫 ${esc(e.message)}</div>`;
+    log(sql, false);
+    opts.after && opts.after(null, e);
+    return null;
+  }
+  log(sql, true);
+  const hint = res.hint && sqlOn && !opts.noHint ? `<div class="msg warn">${esc(res.hint)}</div>` : '';
+  if (res.kind==='select'){
+    out.innerHTML = `<div class="result"><div class="msg info">🔎 ${esc(res.message)}</div>${hint}${res.rows.length || res.count ? resultTable(res) : ''}</div>`;
+    if (!res.count) highlightSrcs(res.srcs); else { hl = {}; renderDB(); }
+    out.querySelectorAll('tr[data-i]').forEach(tr => {
+      tr.addEventListener('mouseenter', () => highlightSrcs([res.srcs[+tr.dataset.i]]));
+      tr.addEventListener('mouseleave', () => highlightSrcs(res.srcs));
+    });
+  } else {
+    let extra = '';
+    if (res.noWhere && (res.ids.length || (res.removed||[]).length))
+      extra = `<div class="msg warn">😱 ${sqlOn ? 'WHERE(조건) 없이' : '어느 줄인지 정하지 않고'} 실행해서 <b>표의 모든 줄</b>이 ${res.op==='update'?'바뀌었어요':'지워졌어요'}! 오른쪽 위 '처음 상태로 되돌리기'를 눌러 보세요.</div>`;
+    out.innerHTML = `<div class="msg ok">✅ ${esc(res.message)}</div>${hint}${extra}`;
+    setHighlight(res.table, res.ids, 'flash');
+  }
+  opts.after && opts.after(res);
+  return res;
+}
+const execLog = [];
+function log(sql, ok){
+  execLog.unshift({sql, ok});
+  if (execLog.length>30) execLog.pop();
+  const el = $('#history'); if (el) el.innerHTML = renderHistory();
+}
+function renderHistory(){
+  if (!execLog.length) return '<div>아직 실행한 문장이 없어요.</div>';
+  return execLog.map(h => `<div class="${h.ok?'':'x'}">${h.ok?'✔':'✖'} ${esc(h.sql)}</div>`).join('');
+}
+
+/* 실험 카드 */
+function expCards(list){
+  return list.map((x,i) => `<div class="exp${x.sqlOnly?' sql-only':''}" id="exp${i}"><b class="t">${x.title}</b>
+    <div class="sql"></div>
+    <button class="btn small ${x.color||''}">해 보기</button><div class="out"></div></div>`).join('');
+}
+function initExp(list){
+  const refresh = () => list.forEach((x,j) => { const b = $('#exp'+j); if (b) b.querySelector('.sql').innerHTML = sqlHTML(typeof x.sql==='function' ? x.sql() : x.sql); });
+  refresh();
+  list.forEach((x,i) => {
+    const box = $('#exp'+i);
+    box.querySelector('button').onclick = () => {
+      const out = box.querySelector('.out');
+      run(typeof x.sql==='function' ? x.sql() : x.sql, out, {noHint: !!x.after, after: (res, err) => { if (x.after){ const m = x.after(res, err); if (m) out.insertAdjacentHTML('beforeend', m); } }});
+      refresh();
+    };
+  });
+}
+
+/* 직원 입력 폼 (기본값이 있는 칸을 비우면 아예 적지 않음) */
+const nextSabun = () => Math.max(1000, ...db.직원.rows.map(r => r.사번 ?? 0)) + 1;
+function insertFormHTML(){
+  return `<div class="insForm">
+    ${db.직원.columns.map(c => `<label class="f"><span>${c.name}${c.pk||c.notnull?' *':''}</span><input data-col="${c.name}" placeholder="${c.def!==undefined ? `비우면 '${c.def}'` : c.pk||c.notnull ? '꼭 채워야 해요' : '비워도 돼요'}"></label>`).join('')}
+    <div class="sqlLabel">SQL</div><div class="sql insSql"></div>
+    <div class="row"><button class="btn green insBtn">입력</button></div>
+    <div class="insOut"></div></div>`;
+}
+function initInsertForm(presets){
+  const root = $('.insForm');
+  const inputs = [...root.querySelectorAll('input[data-col]')];
+  const colOf = i => db.직원.columns.find(c=>c.name===i.dataset.col);
+  const build = () => {
+    const use = inputs.filter(i => !(colOf(i).def!==undefined && i.value.trim()===''));
+    return `INSERT INTO 직원 (${use.map(i=>i.dataset.col).join(', ')})\nVALUES (${use.map(i => lit(i.value, colOf(i).type)).join(', ')})`;
+  };
+  const upd = () => root.querySelector('.insSql').innerHTML = sqlHTML(build());
+  const fill = vals => { inputs.forEach(i => i.value = vals[i.dataset.col] ?? ''); upd(); };
+  inputs.forEach(i => i.oninput = upd);
+  root.querySelector('.insBtn').onclick = () => run(build(), root.querySelector('.insOut'));
+  fill(presets[0].vals());
+  document.querySelectorAll('#presets button').forEach((b,k) => b.onclick = () => { fill(presets[k].vals()); run(build(), root.querySelector('.insOut')); });
+}
+const presetButtons = presets => `<div class="row" id="presets">${presets.map(p => `<button class="btn ghost small">${p.label}</button>`).join('')}</div>`;
+
+/* =========================================================
+   3. 단계별 수업
+   ========================================================= */
+const NOCHECK_EXP = [
+  {title:'① 이름을 비운 채로 직원 입력하기', color:'green',
+   sql:"INSERT INTO 옛날명부 (이름, 입사일, 전화번호)\nVALUES (NULL, '2026-03-02', '010-5555-0000')",
+   after:res => res ? '<div class="msg warn">😮 막지 않았어요! 이름이 없는 직원이 생겼어요. 이 사람은 누구일까요?</div>' : ''},
+  {title:'② 이름도 입사일도 전화번호도 없이 입력하기', color:'green',
+   sql:"INSERT INTO 옛날명부 (이름, 입사일, 전화번호)\nVALUES (NULL, NULL, NULL)",
+   after:res => res ? '<div class="msg warn">😱 아무 정보도 없는 텅 빈 줄이 생겼어요. 이런 줄은 있어 봐야 쓸모가 없고, 오히려 직원 수만 헷갈리게 만들어요.</div>' : ''},
+  {title:'③ 입사한 순서대로 직원 명단 보기', color:'',
+   sql:"SELECT * FROM 옛날명부\nORDER BY 입사일",
+   after:res => res && res.rows.some(r => r[0]==null) ? '<div class="msg warn">🤔 이름도 입사일도 모르는 줄이 섞여 있어서, 명단이 제대로 된 명단이라고 하기 어려워요.</div>' : ''},
+];
+const NN_PRESETS = [
+  {label:'✅ 모두 채워서 입력', vals:() => ({사번:nextSabun(), 이름:'오지환', 입사일:'2026-12-01', 전화번호:'010-1212-3434', 퇴사일:'', 상태:''})},
+  {label:'🚫 이름을 비우고 입력', vals:() => ({사번:nextSabun(), 이름:'', 입사일:'2026-12-01', 전화번호:'010-1212-3434', 퇴사일:'', 상태:''})},
+  {label:'🚫 입사일을 비우고 입력', vals:() => ({사번:nextSabun(), 이름:'오지환', 입사일:'', 전화번호:'010-1212-3434', 퇴사일:'', 상태:''})},
+  {label:'✅ 전화번호·퇴사일은 비우고 입력', vals:() => ({사번:nextSabun(), 이름:'유하늘', 입사일:'2026-12-01', 전화번호:'', 퇴사일:'', 상태:''})},
+];
+const NN_QUIZ = [
+  {col:'이름', ans:'must', why:'이름이 없는 직원은 누구인지 알 수 없어요. 꼭 있어야 해요.', hl:() => true},
+  {col:'입사일', ans:'must', why:'입사하지 않은 직원은 없으니 항상 값이 있어요. 근무 기간이나 연차를 계산할 때도 꼭 필요해요.', hl:() => true},
+  {col:'퇴사일', ans:'never', why:'지금 다니는 직원은 퇴사일이 없어요! 여기에 빈칸 금지를 걸면 재직 중인 직원을 입력할 수가 없게 돼요.', hl:r => r.퇴사일==null},
+  {col:'전화번호', ans:'depends', why:'회사에서 반드시 받기로 했다면 걸고, 아직 모를 수도 있다면 비워 둘 수 있게 해요. 정하기 나름이에요.', hl:r => r.전화번호==null},
+  {col:'상태 (재직·휴직·퇴사)', ans:'must', why:'모든 직원은 항상 재직·휴직·퇴사 중 하나예요. 그래서 빈칸 금지를 걸고, 비워 두면 \'재직\'이 들어가도록 기본값도 정해 뒀어요.', hl:() => true},
+];
+const NN_ANS = {must:'🚫 빈칸 금지를 꼭 걸어야 해요', never:'⭕ 걸면 안 돼요', depends:'🤔 회사 규칙에 따라 달라요'};
+const UPD_EXP = [
+  {title:'① 전화번호가 비어 있는 이서연의 전화번호 채우기', color:'orange', sql:"UPDATE 직원\nSET 전화번호 = '010-1111-2222'\nWHERE 사번 = 1002"},
+  {title:'② 김민준의 전화번호 지우기 (비워 두기)', color:'orange', sql:"UPDATE 직원\nSET 전화번호 = NULL\nWHERE 사번 = 1001"},
+  {title:'③ 박도윤의 이름 지우기 (비워 두기)', color:'orange', sql:"UPDATE 직원\nSET 이름 = NULL\nWHERE 사번 = 1003"},
+  {title:'④ 최지우의 입사일 지우기 (비워 두기)', color:'orange', sql:"UPDATE 직원\nSET 입사일 = NULL\nWHERE 사번 = 1004"},
+  {title:'⑤ 박도윤의 이름을 띄어쓰기 한 칸으로 바꾸기', color:'orange', sql:"UPDATE 직원\nSET 이름 = ' '\nWHERE 사번 = 1003",
+   after:res => res ? `<div class="msg warn">😮 막지 않았어요! 띄어쓰기는 '비어 있음(NULL)'이 아니라 <b>보이지 않는 글자</b>라서 빈칸 금지 규칙을 통과해요.
+     오른쪽 표에서 점선으로 표시된 칸을 보세요. 그래서 실제로는 "띄어쓰기만 있는 이름"을 막는 규칙을 하나 더 걸기도 해요.<span class="sql-only"> (CHECK 규칙)</span></div>` : ''},
+];
+const DEF_EXP = [
+  {title:'① 상태를 적지 않고 신입 입력하기', color:'green',
+   sql:() => `INSERT INTO 직원 (사번, 이름, 입사일)\nVALUES (${nextSabun()}, '오지환', '2026-12-01')`,
+   after:res => res ? '<div class="msg info">상태를 안 적었는데도 <b>\'재직\'</b>이 들어갔어요. 전화번호와 퇴사일은 기본값이 없으니 비어 있어요.</div>' : ''},
+  {title:'② 상태를 \'휴직\'으로 적어서 입력하기', color:'green',
+   sql:() => `INSERT INTO 직원 (사번, 이름, 입사일, 상태)\nVALUES (${nextSabun()}, '유하늘', '2026-12-01', '휴직')`,
+   after:res => res ? '<div class="msg info">직접 적은 값이 있으면 기본값 대신 그 값이 들어가요.</div>' : ''},
+  {title:'③ 상태를 일부러 "비어 있음"이라고 적어서 입력하기', color:'green',
+   sql:() => `INSERT INTO 직원 (사번, 이름, 입사일, 상태)\nVALUES (${nextSabun()}, '서지안', '2026-12-01', NULL)`,
+   after:(res, err) => err ? '<div class="msg info">기본값은 <b>아예 안 적었을 때</b>만 들어가요. "비어 있음"이라고 직접 적으면 빈칸이 들어가려 해서 빈칸 금지에 걸려요.</div>' : ''},
+];
+const FIND_EXP = [
+  {title:'① 전화번호가 비어 있는 직원 찾기', sql:"SELECT 사번, 이름, 전화번호\nFROM 직원\nWHERE 전화번호 IS NULL"},
+  {title:'② 전화번호가 있는 직원 찾기', sql:"SELECT 사번, 이름, 전화번호\nFROM 직원\nWHERE 전화번호 IS NOT NULL"},
+  {title:'③ 퇴사일이 비어 있는(지금 다니는) 직원 찾기', sql:"SELECT 사번, 이름, 상태\nFROM 직원\nWHERE 퇴사일 IS NULL"},
+  {title:'④ = NULL 로 찾으면 어떻게 될까?', sqlOnly:true, sql:"SELECT 사번, 이름, 전화번호\nFROM 직원\nWHERE 전화번호 = NULL",
+   after:res => res && !res.rows.length ? '<div class="msg warn">😮 분명 전화번호가 비어 있는 직원이 있는데 하나도 못 찾았어요! NULL은 "모르는 값"이라서 "모르는 값 = 모르는 값"인지도 알 수 없거든요. 그래서 꼭 <b>IS NULL</b>로 써야 해요.</div>' : ''},
+  {title:'⑤ 직원 수 세기 — 줄 수로 세기', sql:"SELECT COUNT(*)\nFROM 직원"},
+  {title:'⑥ 직원 수 세기 — 전화번호 개수로 세기', sql:"SELECT COUNT(전화번호)\nFROM 직원",
+   after:res => res ? '<div class="msg warn">🤔 ⑤보다 적게 나왔죠? 전화번호가 비어 있는 직원은 세지 않았기 때문이에요. 빈칸이 있는 칸으로 개수를 세면 틀린 답이 나올 수 있어요.</div>' : ''},
+];
+const CREATE_SQL = "CREATE TABLE 직원 (\n  사번     INTEGER PRIMARY KEY,\n  이름     TEXT NOT NULL,\n  입사일   TEXT NOT NULL,\n  전화번호 TEXT,\n  퇴사일   TEXT,\n  상태     TEXT NOT NULL DEFAULT '재직'\n)";
+const EXAMPLES = [
+  "SELECT * FROM 직원 WHERE 전화번호 IS NULL",
+  "SELECT * FROM 직원 WHERE 전화번호 = NULL",
+  "SELECT * FROM 직원 WHERE 퇴사일 IS NOT NULL",
+  "SELECT COUNT(*) FROM 직원",
+  "SELECT COUNT(전화번호) FROM 직원",
+  "INSERT INTO 직원 (사번, 이름, 입사일) VALUES (1020, '오지환', '2026-12-01')",
+  "INSERT INTO 직원 (사번, 이름, 입사일) VALUES (1021, NULL, '2026-12-01')",
+  "INSERT INTO 직원 (사번, 이름) VALUES (1022, '유하늘')",
+  "INSERT INTO 직원 (사번, 이름, 입사일) VALUES (1023, '', '2026-12-01')",
+  "UPDATE 직원 SET 퇴사일 = '2026-11-30', 상태 = '퇴사' WHERE 사번 = 1005",
+  "UPDATE 직원 SET 상태 = NULL WHERE 사번 = 1001",
+  "SELECT * FROM 직원 ORDER BY 전화번호",
+];
+
+const STEPS = [
+  { name:'빈칸(NULL)이 뭐예요?', render(){ return `
+    <h2>❔ 빈칸(NULL)이 뭐예요?</h2>
+    <p>데이터베이스의 칸에 아무것도 들어 있지 않은 상태를 <span class="term">NULL(널)</span>이라고 해요.
+    "값이 <b>없음</b>" 또는 "<b>아직 모름</b>"이라는 뜻이에요. 오른쪽 표에서 흐린 글씨로 <b>(비어 있음)</b>이라고 적힌 칸이 NULL이에요.</p>
+    <div class="grid3">
+      <div class="mini"><b>📞 전화번호 모름</b><small>이서연의 전화번호를 아직 받지 못했어요.</small></div>
+      <div class="mini"><b>🧾 퇴사일 없음</b><small>지금 다니는 직원은 퇴사일이 없어요.</small></div>
+      <div class="mini"><b>📝 설문지 빈칸</b><small>답하지 않은 문항은 비어 있어요.</small></div>
+    </div>
+    <h3>NULL은 0이나 빈 글자와 달라요</h3>
+    <div class="vs">
+      <div class="mini"><b>통장 잔액 0원</b><small>얼마인지 <b>알아요</b>. 0원이에요.</small></div>
+      <div class="mini"><b>통장 잔액 NULL</b><small>얼마인지 <b>몰라요</b>. 0원일 수도, 100만 원일 수도 있어요.</small></div>
+    </div>
+    <h3>그런데 어떤 칸은 절대 비면 안 돼요</h3>
+    <p>전화번호는 몰라도 괜찮지만, <b>이름</b>이나 <b>입사일</b>을 모르는 직원은 이상하죠?
+    그래서 "이 칸은 비워 둘 수 없어"라는 규칙을 걸어 둬요. 이 규칙이 바로 <span class="term">NOT NULL(빈칸 금지)</span>이에요.
+    오른쪽 표에서 <span class="bd nn">🚫 빈칸 금지</span> 표시가 붙은 칸이에요.</p>
+    <p class="muted">무엇을 망가뜨려도 괜찮아요. 언제든 '처음 상태로 되돌리기'를 누르면 돼요.</p>`; },
+    init(){ highlightWhere('직원', r => r.전화번호==null); } },
+
+  { name:'빈칸 금지가 없으면?', tables:['옛날명부'], render(){ return `
+    <h2>😵 빈칸 금지 규칙이 없으면?</h2>
+    <p>오른쪽은 <b>아무 칸에도</b> 빈칸 금지 규칙이 없는 옛날 직원 명부예요. 아래 실험을 차례대로 해 보세요.</p>
+    ${expCards(NOCHECK_EXP)}
+    <h3>무엇이 문제였을까요?</h3>
+    <p>데이터베이스는 시키는 대로 했을 뿐이에요. "이름은 꼭 있어야 해"라고 알려 주지 않았으니 막을 이유가 없었죠.
+    사람은 실수를 하기 마련이라, <b>꼭 필요한 칸</b>은 데이터베이스가 대신 지켜 주도록 규칙을 걸어 둬야 해요.</p>`; },
+    init(){ initExp(NOCHECK_EXP); } },
+
+  { name:'NOT NULL 규칙', render(){ return `
+    <h2>🚫 NOT NULL — 빈칸 금지 규칙</h2>
+    <p>오른쪽 직원 표에는 <b>사번, 이름, 입사일, 상태</b>에 빈칸 금지 규칙이 걸려 있어요. 전화번호와 퇴사일은 비워 둘 수 있어요.
+    아래 버튼을 눌러서 규칙을 어겨 보세요.</p>
+    ${presetButtons(NN_PRESETS)}
+    ${insertFormHTML()}
+    <div class="tip">💡 기본 키(사번)는 원래 비어 있으면 안 되니까, 따로 말하지 않아도 자동으로 빈칸 금지예요.</div>
+    <div class="sqlLabel">SQL로는 표를 처음 만들 때 이렇게 정해 둬요</div>
+    <div class="sql">${sqlHTML(CREATE_SQL)}</div>
+    <p class="muted sql-only">칸 이름 뒤에 <b>NOT NULL</b>을 붙이면 빈칸 금지, 아무것도 안 붙이면 비워 둘 수 있는 칸이에요. <b>DEFAULT</b>는 뒤에서 배울 기본값이에요.</p>`; },
+    init(){ initInsertForm(NN_PRESETS); } },
+
+  { name:'어디에 걸까?', render(){ return `
+    <h2>🤔 어떤 칸에 빈칸 금지를 걸까요?</h2>
+    <p>빈칸 금지는 <b>많이 걸수록 좋은 게 아니에요</b>. "정말로 언제나 값이 있는 칸"에만 걸어야 해요. 각 칸을 골라 보세요.</p>
+    ${NN_QUIZ.map((q,i) => `<div class="quiz" id="nq${i}"><div class="q">${q.col}</div>
+      <div class="row">${Object.entries(NN_ANS).map(([k,v]) => `<button class="btn ghost small" data-a="${k}">${v}</button>`).join('')}</div><div class="out"></div></div>`).join('')}
+    <div class="tip">💡 고르는 기준: "이 칸이 비어 있는 직원이 <b>정상적으로</b> 있을 수 있나?" → 있을 수 있으면 걸지 않고, 있으면 안 되면 걸어요.</div>`; },
+    init(){
+      NN_QUIZ.forEach((q,i) => document.querySelectorAll(`#nq${i} button`).forEach(b => b.onclick = () => {
+        const ok = b.dataset.a===q.ans;
+        $(`#nq${i} .out`).innerHTML = `<div class="msg ${ok?'ok':'err'}">${ok?'정답!':`아쉬워요. 정답은 <b>${NN_ANS[q.ans]}</b>`} — ${q.why}</div>`;
+        highlightWhere('직원', q.hl);
+      }));
+    } },
+
+  { name:'고칠 때도 지켜요', render(){ return `
+    <h2>✏️ 고칠 때도 규칙은 지켜져요</h2>
+    <p>빈칸 금지는 처음 입력할 때만이 아니라, 나중에 <b>값을 고칠 때도</b> 지켜져요. 이미 있는 값을 지워서 빈칸으로 만드는 것도 막아 주거든요.</p>
+    ${expCards(UPD_EXP)}`; },
+    init(){ initExp(UPD_EXP); } },
+
+  { name:'기본값', render(){ return `
+    <h2>🧩 기본값 — 안 적으면 대신 들어가는 값</h2>
+    <p><b>상태</b> 칸은 빈칸 금지예요. 그런데 신입 직원은 거의 다 '재직'이니까 매번 적기 귀찮죠.
+    그래서 <b>안 적으면 대신 들어갈 값</b>을 정해 둘 수 있어요. 이걸 <span class="term">기본값</span>이라고 해요.
+    오른쪽 표의 <span class="bd df">기본값 '재직'</span> 표시를 보세요.</p>
+    ${expCards(DEF_EXP)}
+    <div class="tip">💡 빈칸 금지 + 기본값은 단짝이에요. "비면 안 되지만, 보통은 이 값이야"라는 칸에 함께 걸어요.</div>
+    <p class="muted sql-only">SQL로는 <b>상태 TEXT NOT NULL DEFAULT '재직'</b> 처럼 써요.</p>`; },
+    init(){ initExp(DEF_EXP); } },
+
+  { name:'빈칸 찾기', render(){ return `
+    <h2>🔎 빈칸이 있는 줄 찾기</h2>
+    <p>비워 둘 수 있는 칸은 "비어 있는 사람만" 또는 "채워진 사람만" 찾을 일이 자주 생겨요.</p>
+    ${expCards(FIND_EXP)}
+    <div class="tip">💡 빈칸은 "모르는 값"이라 계산하거나 셀 때 빠지기 쉬워요. 그래서 정말 꼭 있어야 하는 칸은 처음부터 빈칸 금지를 걸어 두는 게 좋아요.</div>
+    <p class="muted sql-only">빈칸을 찾을 때는 <b>IS NULL</b>, 채워진 칸을 찾을 때는 <b>IS NOT NULL</b>을 써요. <b>= NULL</b>은 언제나 아무것도 못 찾아요.</p>`; },
+    init(){ initExp(FIND_EXP); } },
+
+  { name:'직접 SQL 써 보기', sqlOnly:true, render(){ return `
+    <h2>⌨️ NULL과 NOT NULL을 직접 시험해 보세요</h2>
+    <p>아래에 SQL을 적고 <b>실행</b>을 누르세요. (Ctrl + Enter 도 돼요) 예시를 누르면 바로 실행돼요.</p>
+    <textarea id="free">SELECT 이름, 전화번호 FROM 직원 WHERE 전화번호 IS NULL</textarea>
+    <div class="row"><button class="btn" id="freeBtn">실행</button><button class="btn ghost small" id="clearBtn">지우기</button></div>
+    <div id="freeOut"></div>
+    <h3>예시</h3>
+    <div class="examples">${EXAMPLES.map(e=>`<button>${esc(e)}</button>`).join('')}</div>
+    <h3>짧은 사전</h3>
+    <div class="cheat">
+      <code>NULL</code><span>비어 있음 · 모름</span>
+      <code>NOT NULL</code><span>빈칸 금지. 표를 만들 때 칸 이름 뒤에 붙여요</span>
+      <code>DEFAULT 값</code><span>칸을 안 적었을 때 대신 들어가는 기본값</span>
+      <code>WHERE 칸 IS NULL</code><span>그 칸이 비어 있는 줄 찾기</span>
+      <code>WHERE 칸 IS NOT NULL</code><span>그 칸이 채워진 줄 찾기</span>
+      <code>COUNT(*) / COUNT(칸)</code><span>줄 수 세기 / 그 칸이 비어 있지 않은 줄만 세기</span>
+      <code>''</code><span>빈 글자. NULL이 아니라서 빈칸 금지를 통과해요</span>
+    </div>
+    <h3>실행 기록</h3>
+    <div class="history" id="history">${renderHistory()}</div>`; },
+    init(){
+      const go1 = () => run($('#free').value, $('#freeOut'));
+      $('#freeBtn').onclick = go1;
+      $('#clearBtn').onclick = () => { $('#free').value=''; $('#free').focus(); };
+      $('#free').onkeydown = e => { if (e.key==='Enter' && (e.ctrlKey||e.metaKey)){ e.preventDefault(); go1(); } };
+      document.querySelectorAll('.examples button').forEach(b => b.onclick = () => { $('#free').value = b.textContent; go1(); });
+    } },
+
+  { name:'정리', render(){ return `
+    <h2>🎉 NOT NULL 정리</h2>
+    <div class="gloss">
+      <b>NULL (빈칸)</b><span>값이 없음 · 아직 모름. 0이나 빈 글자와는 달라요</span>
+      <b>🚫 NOT NULL (빈칸 금지)</b><span>이 칸은 비워 둘 수 없다는 규칙. 입력할 때도, 고칠 때도 지켜져요</span>
+      <b>기본 키</b><span>원래 비어 있으면 안 되니까 자동으로 빈칸 금지예요</span>
+      <b>기본값</b><span>칸을 아예 안 적었을 때 대신 들어가는 값 (상태 → '재직')</span>
+      <b>빈 글자 · 띄어쓰기</b><span>눈에는 비어 보여도 NULL이 아니라서 빈칸 금지를 통과해요</span>
+      <b class="sql-only">IS NULL · IS NOT NULL</b><span class="sql-only">빈칸 찾기 · 채워진 칸 찾기 (= NULL 은 안 돼요)</span>
+      <b class="sql-only">COUNT(칸)</b><span class="sql-only">비어 있지 않은 줄만 세요</span>
+    </div>
+    <div class="sql">${sqlHTML(CREATE_SQL)}</div>
+    <h3>빈칸 금지를 걸지 말지 정하는 법</h3>
+    <ul>
+      <li>그 칸이 비어 있는 경우가 <b>정상적으로 있을 수 있나요?</b> (퇴사일, 아직 모르는 전화번호) → 걸지 않아요.</li>
+      <li>비어 있으면 <b>그 줄이 이상해지나요?</b> (이름, 입사일) → 꼭 걸어요.</li>
+      <li>비면 안 되지만 <b>보통 정해진 값</b>이 있나요? (상태) → 빈칸 금지 + 기본값을 함께 걸어요.</li>
+    </ul>
+    <button class="btn ghost" id="again">처음부터 다시 하기</button>`; },
+    init(){ $('#again').onclick = () => { resetDB(); hl = {}; go(0); }; } },
+];
+
+/* =========================================================
+   4. 단계 이동
+   ========================================================= */
+let cur = 0;
+const visited = new Set([0]);
+const visibleSteps = () => STEPS.map((s,i)=>i).filter(i => sqlOn || !STEPS[i].sqlOnly);
+function stepLabel(i){ return `${visibleSteps().indexOf(i)+1}. ${STEPS[i].name}`; }
+function renderNav(){
+  const vis = visibleSteps(), k = vis.indexOf(cur), prev = vis[k-1], next = vis[k+1];
+  $('#nav').innerHTML = `
+      <button class="btn ghost" id="prev" ${prev===undefined?'disabled':''}>← 이전</button>
+      ${next!==undefined ? `<button class="btn" id="next">다음: ${STEPS[next].name} →</button>` : ''}`;
+  if (prev!==undefined) $('#prev').onclick = () => go(prev);
+  if (next!==undefined) $('#next').onclick = () => go(next);
+}
+function applySql(){
+  document.body.classList.toggle('sql-off', !sqlOn);
+  $('#sqlToggle').checked = sqlOn;
+  try { localStorage.setItem('db-exp-sql', sqlOn ? '1' : '0'); } catch(e){}
+}
+function go(i){
+  STEPS[cur].leave && STEPS[cur].leave();
+  cur = i; visited.add(i);
+  hl = {};
+  const s = STEPS[i];
+  $('#lesson').innerHTML = s.render() + `<div class="nav" id="nav"></div>`;
+  renderNav();
+  renderDB();
+  s.init && s.init();
+  renderSteps();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+function renderSteps(){
+  $('#steps').innerHTML = visibleSteps().map(i => `<button class="${i===cur?'on':visited.has(i)?'done':''}" data-i="${i}">${stepLabel(i)}</button>`).join('');
+  document.querySelectorAll('#steps button').forEach(b => b.onclick = () => go(+b.dataset.i));
+}
+$('#resetBtn').onclick = () => { resetDB(); hl = {}; go(cur); };
+$('#sqlToggle').onchange = e => {
+  sqlOn = e.target.checked; applySql();
+  if (!sqlOn && STEPS[cur].sqlOnly){ const vis = visibleSteps(); go(vis.find(i => i > cur) ?? vis[vis.length-1]); }
+  else { renderSteps(); renderNav(); renderDB(); }
+};
+applySql();
+go(0);
+</script>
+</body>
+</html>
